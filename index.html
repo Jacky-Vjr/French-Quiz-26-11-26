@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon Cahier de Français — เว็บเรียนภาษาฝรั่งเศสครบทุกบท</title>
+
+  <!-- Google Fonts: Prompt (Thai) + Plus Jakarta Sans (French/English) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            thai: ['"Prompt"', '"Plus Jakarta Sans"', 'sans-serif'],
+            fr: ['"Plus Jakarta Sans"', '"Prompt"', 'sans-serif'],
+          },
+          colors: {
+            paper: '#FAF9F6',
+            navy: '#1E3A5F',
+            navyDark: '#142842',
+            coral: '#E63946',
+            mascBg: '#DBEAFE',
+            mascText: '#1D4ED8',
+            femBg: '#FCE7F3',
+            femText: '#BE185D',
+            liaisonBg: '#FEF3C7',
+            liaisonText: '#B45309',
+          },
+          boxShadow: {
+            card: '0 4px 20px -4px rgba(30, 58, 95, 0.08), 0 2px 6px -2px rgba(30, 58, 95, 0.04)',
+            soft: '0 8px 30px rgba(30, 58, 95, 0.09)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      font-family: 'Prompt', 'Plus Jakarta Sans', sans-serif;
+      background-color: #FAF9F6;
+      color: #1F2937;
+    }
+
+    /* Subtle notebook dot pattern on main workspace */
+    .notebook-bg {
+      background-color: #FAF9F6;
+      background-image: radial-gradient(#E5E0D5 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+
+    /* Smooth tab panel entrance */
+    .tab-panel {
+      animation: fadeSlide 0.26s ease-out;
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 3D Flashcard flip */
+    .perspective-1000 { perspective: 1000px; }
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      transform-style: preserve-3d;
+    }
+    .flashcard-inner.is-flipped { transform: rotateY(180deg); }
+    .flashcard-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+    .flashcard-back { transform: rotateY(180deg); }
+
+    /* Animated Cat Sprite in Room Visualizer */
+    #cat-sprite {
+      transition: transform 0.65s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.35s ease;
+    }
+
+    /* Custom subtle scrollbar */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: #F3F1EC; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Print Styling for Master Cheat Sheet */
+    @media print {
+      aside, #mobile-header, #mobile-drawer, #toast-container, .no-print {
+        display: none !important;
+      }
+      main {
+        margin-left: 0 !important;
+        padding: 0 !important;
+        background: white !important;
+      }
+      .tab-panel { display: none !important; }
+      #tab-5 { display: block !important; }
+      .print-break-avoid { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body class="notebook-bg min-h-screen overflow-x-hidden selection:bg-coral/20 selection:text-navy">
+
+  <!-- Toast Notification Container (No alert() used anywhere) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Mobile Top Header -->
+  <header id="mobile-header" class="lg:hidden sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-stone-200 px-4 py-3 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-2.5">
+      <button onclick="toggleMobileDrawer(true)" class="p-2.5 rounded-xl bg-paper border border-stone-200 text-navy hover:bg-stone-100 active:scale-95 transition" aria-label="เปิดเมนู">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div>
+        <div class="font-fr font-extrabold text-navy text-base leading-tight flex items-center gap-1.5">
+          <span class="inline-block w-2 h-4 rounded-sm bg-navy"></span>
+          <span class="inline-block w-2 h-4 rounded-sm bg-stone-200 border border-stone-300"></span>
+          <span class="inline-block w-2 h-4 rounded-sm bg-coral"></span>
+          <span>Mon Cahier FR</span>
+        </div>
+        <div class="text-[11px] text-stone-500">สรุปฝรั่งเศสครบทั้ง 3 ไฟล์</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="toggleSpeechSpeed()" class="speed-toggle-btn px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-liaisonBg text-liaisonText border border-amber-200 active:scale-95 transition">
+        🔊 ปกติ
+      </button>
+      <button onclick="openSearchModal()" class="p-2.5 rounded-xl bg-navy text-white hover:bg-navyDark active:scale-95 transition" aria-label="ค้นหา">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Overlay -->
+  <div id="mobile-drawer" class="fixed inset-0 z-50 hidden lg:hidden">
+    <div onclick="toggleMobileDrawer(false)" class="absolute inset-0 bg-navy/40 backdrop-blur-xs"></div>
+    <div class="relative w-80 max-w-[85vw] h-full bg-white shadow-2xl flex flex-col p-5 overflow-y-auto">
+      <div class="flex items-center justify-between mb-5">
+        <div class="font-fr font-extrabold text-navy text-lg">🇫🇷 Mon Cahier</div>
+        <button onclick="toggleMobileDrawer(false)" class="p-2 rounded-xl bg-stone-100 text-stone-600 hover:bg-stone-200">✕</button>
+      </div>
+      <div id="mobile-nav-links" class="space-y-1.5"></div>
+      <div class="mt-6 pt-5 border-t border-stone-200">
+        <div class="flex items-center justify-between text-xs font-semibold text-navy mb-1.5">
+          <span>ความคืบหน้าการเรียน</span>
+          <span class="progress-percent-text">0%</span>
+        </div>
+        <div class="w-full h-2.5 bg-stone-200 rounded-full overflow-hidden">
+          <div class="progress-bar-fill h-full bg-gradient-to-r from-navy to-coral transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Sidebar -->
+  <aside class="hidden lg:flex fixed top-0 left-0 bottom-0 w-72 bg-white border-r border-stone-200/90 flex-col z-30 shadow-sm">
+    <!-- Brand -->
+    <div class="p-5 border-b border-stone-100">
+      <div class="flex items-center gap-2 mb-1">
+        <div class="flex h-6 w-8 rounded-md overflow-hidden border border-stone-200 shadow-xs">
+          <div class="w-1/3 bg-navy"></div>
+          <div class="w-1/3 bg-white"></div>
+          <div class="w-1/3 bg-coral"></div>
+        </div>
+        <h1 class="font-fr font-extrabold text-lg text-navy tracking-tight">Mon Cahier FR</h1>
+      </div>
+      <p class="text-xs text-stone-500">สมุดโน้ตฝรั่งเศสฉบับเข้าใจง่าย • เก็บครบทุกดีเทล</p>
+
+      <!-- Global Search Input -->
+      <div class="mt-4 relative">
+        <input id="desktop-search-input" type="text" placeholder="ค้นหาคำศัพท์ กริยา ตัวเลข..."
+          oninput="handleGlobalSearch(this.value)"
+          onfocus="if(this.value.trim()) openSearchResults()"
+          class="w-full pl-9 pr-8 py-2.5 text-xs rounded-xl bg-paper border border-stone-200 focus:border-navy focus:ring-2 focus:ring-navy/15 outline-none transition" />
+        <svg class="w-4 h-4 text-stone-400 absolute left-3 top-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+        <button id="clear-search-btn" onclick="clearGlobalSearch()" class="hidden absolute right-2.5 top-2.5 text-stone-400 hover:text-coral text-xs font-bold px-1">✕</button>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav id="desktop-nav-links" class="flex-1 p-3.5 space-y-1.5 overflow-y-auto"></nav>
+
+    <!-- Bottom Controls: Audio Speed & Study Progress -->
+    <div class="p-4 border-t border-stone-100 bg-paper/60 space-y-3">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-medium text-stone-600">ความเร็วเสียงอ่าน</span>
+        <button onclick="toggleSpeechSpeed()" class="speed-toggle-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-liaisonBg text-liaisonText border border-amber-200 hover:bg-amber-200/70 transition">
+          🔊 ปกติ (0.92x)
+        </button>
+      </div>
+      <div>
+        <div class="flex items-center justify-between text-xs font-semibold text-navy mb-1.5">
+          <span>ความคืบหน้าของฉัน</span>
+          <span class="progress-percent-text">0%</span>
+        </div>
+        <div class="w-full h-2.5 bg-stone-200 rounded-full overflow-hidden">
+          <div class="progress-bar-fill h-full bg-gradient-to-r from-navy via-blue-600 to-coral transition-all duration-500" style="width: 0%"></div>
+        </div>
+        <p class="progress-count-text text-[11px] text-stone-500 mt-1">ติ๊ก "เข้าใจแล้ว" เพื่อสะสมความคืบหน้า</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Global Search Modal / Dropdown Panel -->
+  <div id="search-modal" class="fixed inset-0 z-50 hidden items-start justify-center pt-16 sm:pt-20 px-4 bg-navy/40 backdrop-blur-xs">
+    <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-stone-200 overflow-hidden max-h-[80vh] flex flex-col">
+      <div class="p-4 border-b border-stone-100 flex items-center gap-3">
+        <svg class="w-5 h-5 text-navy shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path stroke-linecap="round" d="M21 21l-4.35-4.35"/></svg>
+        <input id="modal-search-input" type="text" placeholder="พิมพ์ค้นหา เช่น avoir, bureau 42, 69, chat, courses, parler..."
+          oninput="renderSearchResults(this.value)"
+          class="flex-1 text-sm outline-none font-medium text-navy placeholder:text-stone-400" />
+        <button onclick="closeSearchModal()" class="px-3 py-1.5 rounded-xl bg-stone-100 text-stone-600 text-xs font-semibold hover:bg-stone-200">ปิด</button>
+      </div>
+      <div id="search-results-list" class="p-4 overflow-y-auto space-y-2.5 flex-1"></div>
+    </div>
+  </div>
+
+  <!-- Main Workspace -->
+  <main class="lg:ml-72 min-h-screen px-4 sm:px-6 lg:px-10 py-6 lg:py-8 max-w-6xl mx-auto">
+
+    <!-- ===================================================================== -->
+    <!-- TAB 0: OVERVIEW & ROADMAP                                             -->
+    <!-- ===================================================================== -->
+    <section id="tab-0" class="tab-panel space-y-6">
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-navy via-[#244773] to-navyDark text-white p-6 sm:p-8 shadow-soft">
+        <div class="absolute -right-10 -top-10 w-52 h-52 rounded-full bg-coral/20 blur-2xl"></div>
+        <div class="absolute right-12 bottom-0 w-40 h-40 rounded-full bg-blue-300/15 blur-xl"></div>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="max-w-2xl">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold mb-3 border border-white/20">
+              <span>🥐</span>
+              <span>Parisian Study Notebook • ครบ 100% จาก 3 เอกสารเรียน</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-bold leading-snug mb-2">
+              เรียนภาษาฝรั่งเศสให้ <span class="text-amber-300">เข้าใจง่ายที่สุด</span> โดยไม่ตกหล่นสักดีเทล
+            </h2>
+            <p class="text-sm sm:text-base text-blue-100/90 leading-relaxed">
+              สรุปเนื้อหาจากไฟล์เรียนทั้ง 3 ฉบับ จัดหมวดหมู่ใหม่ให้อ่านลื่น มีปุ่มกดฟังเสียงฝรั่งเศส <span class="font-semibold text-white">🔊</span> ทุกประโยค พร้อมภาพจำลองและแบบทดสอบให้จำได้จริง
+            </p>
+            <div class="flex flex-wrap gap-2.5 mt-5">
+              <button onclick="switchTab(1)" class="px-5 py-2.5 rounded-xl bg-coral hover:bg-red-600 text-white text-sm font-semibold shadow-md active:scale-95 transition">
+                เริ่มเรียนบทที่ 1 →
+              </button>
+              <button onclick="switchTab(4)" class="px-4 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-sm font-semibold border border-white/25 active:scale-95 transition">
+                🃏 ฝึก Flashcards & Quiz
+              </button>
+              <button onclick="switchTab(5)" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-medium border border-white/15 active:scale-95 transition">
+                📄 ชีทสรุปหน้าเดียว
+              </button>
+            </div>
+          </div>
+          <!-- Progress Donut Card -->
+          <div class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 sm:p-5 min-w-[210px] text-center">
+            <div class="text-xs uppercase tracking-wider text-blue-100 font-semibold mb-1">ระดับความเข้าใจของคุณ</div>
+            <div class="text-4xl font-fr font-extrabold text-amber-300 progress-percent-text">0%</div>
+            <div class="w-full h-2 bg-white/20 rounded-full overflow-hidden my-2.5">
+              <div class="progress-bar-fill h-full bg-amber-300 transition-all duration-500" style="width:0%"></div>
+            </div>
+            <div class="text-xs text-blue-100 progress-count-text">0 / 12 หัวข้อที่ทำเครื่องหมายแล้ว</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Color Code Legend -->
+      <div class="bg-white rounded-2xl p-5 shadow-card border border-stone-200/80">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-3.5">
+          <h3 class="font-bold text-navy text-base flex items-center gap-2">
+            <span>🎨</span> รหัสสีช่วยให้จำไวยากรณ์ฝรั่งเศสได้ทันที (Color-Code Guide)
+          </h3>
+          <span class="text-xs text-stone-500">คลิกปุ่ม 🔊 ที่ไหนก็ได้เพื่อฟังเสียงอ่านฝรั่งเศส</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="rounded-xl p-3.5 bg-mascBg/65 border border-blue-200 flex items-start gap-3">
+            <span class="px-2.5 py-1 rounded-lg bg-mascBg text-mascText font-fr font-bold text-xs border border-blue-300 shrink-0">MASCULIN</span>
+            <div class="text-xs text-stone-700 leading-relaxed">
+              <div class="font-bold text-mascText mb-0.5">สีฟ้า = คำนามเพศชาย</div>
+              ใช้กับ <span class="font-fr font-bold">le / du / au / le premier</span> เช่น <em>le chat, du tennis, au bout du...</em>
+            </div>
+          </div>
+          <div class="rounded-xl p-3.5 bg-femBg/65 border border-pink-200 flex items-start gap-3">
+            <span class="px-2.5 py-1 rounded-lg bg-femBg text-femText font-fr font-bold text-xs border border-pink-300 shrink-0">FÉMININ</span>
+            <div class="text-xs text-stone-700 leading-relaxed">
+              <div class="font-bold text-femText mb-0.5">สีชมพู = คำนามเพศหญิง</div>
+              ใช้กับ <span class="font-fr font-bold">la / de la / à la / la première</span> เช่น <em>la lampe, de la danse</em>
+            </div>
+          </div>
+          <div class="rounded-xl p-3.5 bg-liaisonBg/75 border border-amber-200 flex items-start gap-3">
+            <span class="px-2.5 py-1 rounded-lg bg-liaisonBg text-liaisonText font-fr font-bold text-xs border border-amber-300 shrink-0">LIAISON</span>
+            <div class="text-xs text-stone-700 leading-relaxed">
+              <div class="font-bold text-liaisonText mb-0.5">สีเหลืองอำพัน = จุดเชื่อมเสียง/ออกเสียง</div>
+              เช่น <span class="font-fr font-bold">(Z), (N), T, V</span> ตามโน้ตอาจารย์ เช่น <em>Nous (Z) avons, vingtTans, neufVième</em>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Source Files Roadmap -->
+      <div>
+        <h3 class="font-bold text-navy text-lg mb-3.5 flex items-center gap-2">
+          <span>📚</span> แผนที่เนื้อหาทั้ง 3 เอกสาร (คลิกเพื่อเข้าเรียน)
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- File 1 Card -->
+          <div onclick="switchTab(1)" class="cursor-pointer group bg-white rounded-2xl p-5 shadow-card border border-stone-200/80 hover:border-navy/40 hover:-translate-y-0.5 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="px-2.5 py-1 rounded-lg bg-navy/10 text-navy font-fr font-bold text-xs">ไฟล์ที่ 1</span>
+                <span class="text-xs text-stone-400 font-fr">14–15 & 21–22 OCT</span>
+              </div>
+              <h4 class="font-bold text-navy text-base group-hover:text-coral transition mb-2">การแนะนำตัว, ตัวเลข 11–30, AVOIR & FAIRE</h4>
+              <ul class="text-xs text-stone-600 space-y-1.5 leading-relaxed">
+                <li>• Le Forum des jeunes étrangers & รูปปฏิเสธ <b>N'...PAS</b></li>
+                <li>• ตัวเลข 11–30 พร้อมจุดเชื่อมเสียง <b>vingtTans / vingtTet un</b></li>
+                <li>• <b>6 คำถามสัมภาษณ์</b> + Kylian Mbappé + การบ้านดารา</li>
+                <li>• ผันกริยา <b>AVOIR</b> + 8 ประโยคตัวอย่างครบเป๊ะ</li>
+                <li>• ผันกริยา <b>FAIRE</b> (งานบ้าน/เรียน/กีฬา) + เตือน <b>course vs courses</b></li>
+              </ul>
+            </div>
+            <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-semibold text-navy">
+              <span>เข้าสู่บทเรียนที่ 1</span>
+              <span class="group-hover:translate-x-1 transition">→</span>
+            </div>
+          </div>
+
+          <!-- File 2 Card -->
+          <div onclick="switchTab(2)" class="cursor-pointer group bg-white rounded-2xl p-5 shadow-card border border-stone-200/80 hover:border-navy/40 hover:-translate-y-0.5 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="px-2.5 py-1 rounded-lg bg-coral/10 text-coral font-fr font-bold text-xs">ไฟล์ที่ 2</span>
+                <span class="text-xs text-stone-400 font-fr">4 VERBS --ER</span>
+              </div>
+              <h4 class="font-bold text-navy text-base group-hover:text-coral transition mb-2">กริยาลงท้ายด้วย -ER & S'appeler</h4>
+              <ul class="text-xs text-stone-600 space-y-1.5 leading-relaxed">
+                <li>• สูตรลัดตัด <b>-ER</b> เติมหาง <b>-e, -es, -e, -ons, -ez, -ent</b></li>
+                <li>• กฎลดรูป <b>J'</b> และเชื่อมเสียง <b>z</b> หน้าสระ/ตัว h</li>
+                <li>• 4 กริยาสำคัญ: <b>PARLER, AIMER, HABITER, ÉCOUTER</b></li>
+                <li>• กริยาพิเศษ <b>S'APPELER</b> (เบิ้ล ll vs l ตัวเดียว)</li>
+                <li>• เครื่องทดลองผัน 6 กริยาเสริม (Travailler → Donner)</li>
+              </ul>
+            </div>
+            <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-semibold text-navy">
+              <span>เข้าสู่บทเรียนที่ 2</span>
+              <span class="group-hover:translate-x-1 transition">→</span>
+            </div>
+          </div>
+
+          <!-- File 3 Card -->
+          <div onclick="switchTab(3)" class="cursor-pointer group bg-white rounded-2xl p-5 shadow-card border border-stone-200/80 hover:border-navy/40 hover:-translate-y-0.5 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-fr font-bold text-xs">ไฟล์ที่ 3</span>
+                <span class="text-xs text-stone-400 font-fr">28–29 OCT & 4–5 NOV</span>
+              </div>
+              <h4 class="font-bold text-navy text-base group-hover:text-coral transition mb-2">บอกทาง Bureau 42, ตัวเลข 30–69, ลำดับที่ & แมวอยู่ไหน?</h4>
+              <ul class="text-xs text-stone-600 space-y-1.5 leading-relaxed">
+                <li>• วิดีโอ <b>Où est le bureau 42?</b> (หน้า 35) + แผนที่จำลอง</li>
+                <li>• 4 กริยาบอกทาง: <b>ALLER, CONNAÎTRE, TOURNER, CHERCHER</b></li>
+                <li>• ตัวเลข <b>30–69</b> พร้อมกฎ <b>ET un</b></li>
+                <li>• เลขลำดับที่ <b>1er – 69e</b> (1er แยกเพศ, 2e+ เหมือนกัน, 69ème Ave)</li>
+                <li>• ห้องจำลอง <b>Où est le chat ?</b> ครบทุกบุพบท!</li>
+              </ul>
+            </div>
+            <div class="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between text-xs font-semibold text-navy">
+              <span>เข้าสู่บทเรียนที่ 3</span>
+              <span class="group-hover:translate-x-1 transition">→</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Study Checklist Overview -->
+      <div class="bg-white rounded-2xl p-5 shadow-card border border-stone-200/80">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-4">
+          <h3 class="font-bold text-navy text-base flex items-center gap-2">
+            <span>✅</span> เช็กลิสต์ความคืบหน้าครบทั้ง 12 หัวข้อย่อย
+          </h3>
+          <button onclick="resetProgress()" class="text-xs text-stone-400 hover:text-coral underline">รีเซ็ตความคืบหน้า</button>
+        </div>
+        <div id="overview-checklist" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 1: LESSONS 14-15 & 21-22 OCT                                      -->
+    <!-- ===================================================================== -->
+    <section id="tab-1" class="tab-panel hidden space-y-7">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-4 border-b border-stone-200">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-navy text-white text-xs font-fr font-semibold mb-2">LESSONS 14.15 OCT & 21–22 OCT</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-navy">บทเรียน 14–15 & 21–22 ต.ค.</h2>
+          <p class="text-sm text-stone-600 mt-1">การแนะนำตัว, รูปปฏิเสธ, ตัวเลข 11–30, 6 คำถามสัมภาษณ์, กริยา AVOIR & FAIRE</p>
+        </div>
+        <button onclick="switchTab(2)" class="self-start sm:self-auto px-4 py-2 rounded-xl bg-white border border-stone-200 text-navy text-xs font-semibold hover:bg-stone-50 shadow-xs">
+          บทถัดไป: กริยา -ER →
+        </button>
+      </div>
+
+      <!-- 1.1 Reminder & Negation -->
+      <article id="sec-1-1" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">1.1 Reminder • LE FORUM DES JEUNES ÉTRANGERS À PARIS</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">การสร้างประโยคปฏิเสธ (N'...PAS) และคำถาม Quelles</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t1_negation"></div>
+        </div>
+
+        <!-- Visual Negation Sandwich -->
+        <div class="rounded-2xl bg-paper border border-stone-200 p-4">
+          <div class="text-xs font-bold text-navy mb-2.5">🥪 สูตรแซนด์วิชประโยคปฏิเสธ (เอา <span class="text-coral">NE / N'</span> กับ <span class="text-coral">PAS</span> ประกบหน้า-หลังกริยา!)</div>
+          <div class="flex flex-wrap items-center gap-2 font-fr text-sm sm:text-base">
+            <span class="px-3 py-1.5 rounded-xl bg-white border border-stone-300 font-semibold text-stone-700">ประธาน (Sujet)</span>
+            <span class="text-stone-400 font-bold">+</span>
+            <span class="px-3 py-1.5 rounded-xl bg-coral text-white font-bold shadow-xs">NE / N'</span>
+            <span class="text-stone-400 font-bold">+</span>
+            <span class="px-3 py-1.5 rounded-xl bg-navy text-white font-bold shadow-xs">กริยา (Verbe)</span>
+            <span class="text-stone-400 font-bold">+</span>
+            <span class="px-3 py-1.5 rounded-xl bg-coral text-white font-bold shadow-xs">PAS</span>
+            <span class="text-xs text-stone-500 font-thai ml-1">(ใช้ <b>N'</b> เมื่อกริยาขึ้นต้นด้วยสระหรือตัว h เช่น N'habite, N'est)</span>
+          </div>
+        </div>
+
+        <!-- Exact 3 Examples -->
+        <div class="space-y-3">
+          <div class="p-4 rounded-xl bg-stone-50 border border-stone-200/80 flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <div class="font-fr font-bold text-navy text-sm sm:text-base">
+                Non, Marcos <span class="text-coral underline decoration-2">N'</span>habite <span class="text-coral underline decoration-2">PAS</span> à Madrid, Marcos habite à Paris.
+              </div>
+              <div class="text-xs sm:text-sm text-stone-600">ไม่ มาร์กอส<b class="text-coral">ไม่ได้</b>อาศัยอยู่ที่มาดริด มาร์กอสอาศัยอยู่ที่ปารีส</div>
+            </div>
+            <button onclick="speakFrench('Non, Marcos n\'habite pas à Madrid, Marcos habite à Paris.')" class="shrink-0 p-2.5 rounded-xl bg-white border border-stone-200 hover:bg-navy hover:text-white transition" title="ฟังเสียง">🔊</button>
+          </div>
+
+          <div class="p-4 rounded-xl bg-stone-50 border border-stone-200/80 flex items-start justify-between gap-3">
+            <div class="space-y-1.5">
+              <div class="font-fr font-bold text-navy text-sm sm:text-base flex flex-wrap items-center gap-1.5">
+                <span>Quelles</span>
+                <span class="px-2 py-0.5 rounded-md bg-liaisonBg text-liaisonText text-xs font-bold border border-amber-300">sounds "kell" (= which)</span>
+                <span>langues Paula parle ? Elle parle espagnol, anglais et allemand.</span>
+              </div>
+              <div class="text-xs sm:text-sm text-stone-600">เปาลาพูดภาษาอะไรบ้าง? เธอพูดภาษาสเปน อังกฤษ และเยอรมัน</div>
+            </div>
+            <button onclick="speakFrench('Quelles langues Paula parle ? Elle parle espagnol, anglais et allemand.')" class="shrink-0 p-2.5 rounded-xl bg-white border border-stone-200 hover:bg-navy hover:text-white transition" title="ฟังเสียง">🔊</button>
+          </div>
+
+          <div class="p-4 rounded-xl bg-stone-50 border border-stone-200/80 flex items-start justify-between gap-3">
+            <div class="space-y-1">
+              <div class="font-fr font-bold text-navy text-sm sm:text-base">
+                Paula est française ? <span class="text-stone-400">>>></span> Non, Paula <span class="text-coral underline decoration-2">N'</span>est <span class="text-coral underline decoration-2">PAS</span> française, elle est espagnole.
+              </div>
+              <div class="text-xs sm:text-sm text-stone-600">เปาลาเป็นคนฝรั่งเศสใช่ไหม? ไม่ เปาลา<b class="text-coral">ไม่ใช่</b>คนฝรั่งเศส เธอเป็นคนสเปน</div>
+            </div>
+            <button onclick="speakFrench('Paula est française ? Non, Paula n\'est pas française, elle est espagnole.')" class="shrink-0 p-2.5 rounded-xl bg-white border border-stone-200 hover:bg-navy hover:text-white transition" title="ฟังเสียง">🔊</button>
+          </div>
+        </div>
+
+        <!-- Exercise Reference Badge -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-50 border border-blue-200 text-xs font-semibold text-navy">
+          <span>📘</span>
+          <span>อ้างอิงแบบฝึกหัดในห้อง: <span class="font-fr">exercices 1 et 3 page 13 (TDC / CA U1L2)</span></span>
+        </div>
+      </article>
+
+      <!-- 1.2 Numbers 11 to 30 -->
+      <article id="sec-1-2" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">1.2 LES NOMBRES : 11 → 30</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">ตัวเลขภาษาฝรั่งเศส 11 ถึง 30 (คลิกเพื่อฟังเสียงทุกตัว)</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t1_numbers11_30"></div>
+        </div>
+
+        <!-- Pronunciation Liaison Callout -->
+        <div class="rounded-2xl bg-liaisonBg/70 border border-amber-300 p-4 space-y-2">
+          <div class="font-bold text-liaisonText text-sm flex items-center gap-2">
+            <span>🗣️</span> จุดออกเสียงสำคัญของเลข 20–29 (โน้ตอาจารย์!)
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs sm:text-sm">
+            <button onclick="speakFrench('J\'ai vingt ans')" class="text-left p-3 rounded-xl bg-white border border-amber-200 hover:border-amber-400 transition flex items-center justify-between gap-2">
+              <div>
+                <div class="font-fr font-bold text-navy">J'ai vingt<span class="text-coral">T</span>ans</div>
+                <div class="text-stone-600 text-xs">เชื่อมตัว T → อ่าน <b>แวง-ต็อง</b> (ฉันอายุ 20 ปี)</div>
+              </div>
+              <span>🔊</span>
+            </button>
+            <button onclick="speakFrench('vingt et un')" class="text-left p-3 rounded-xl bg-white border border-amber-200 hover:border-amber-400 transition flex items-center justify-between gap-2">
+              <div>
+                <div class="font-fr font-bold text-navy">vingt<span class="text-coral">T</span>et un (21)</div>
+                <div class="text-stone-600 text-xs">ออกเสียง T + <b>et</b> → <b>แวง-เต-เอิง</b></div>
+              </div>
+              <span>🔊</span>
+            </button>
+            <button onclick="speakFrench('vingt-deux')" class="text-left p-3 rounded-xl bg-white border border-amber-200 hover:border-amber-400 transition flex items-center justify-between gap-2">
+              <div>
+                <div class="font-fr font-bold text-navy">vingt<span class="text-coral">T</span>deux (22) >>> 30</div>
+                <div class="text-stone-600 text-xs">21–29 ออกเสียงตัว <b>T</b> ชัด (แวงต์-เดอ)</div>
+              </div>
+              <span>🔊</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Clickable 11-30 Grid -->
+        <div id="grid-numbers-11-30" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-2.5"></div>
+      </article>
+
+      <!-- 1.3 Six Identity Questions + Mbappé + Homework Builder -->
+      <article id="sec-1-3" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-5">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">1.3 ASK 6 QUESTIONS ABOUT IDENTITY (APPLY IN CLASS)</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">6 คำถามถามข้อมูลส่วนตัว + สัมภาษณ์ Kylian Mbappé</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t1_6questions"></div>
+        </div>
+
+        <!-- 6 Q&A Cards -->
+        <div id="six-questions-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
+
+        <!-- Class Activity & Homework Interactive Box -->
+        <div class="rounded-2xl bg-gradient-to-br from-navy/5 to-blue-50 border border-navy/15 p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="inline-flex items-center gap-1.5 text-xs font-bold text-coral uppercase">⚽ กิจกรรมในห้องเรียน & การบ้าน (Homework)</div>
+              <h4 class="font-bold text-navy text-base mt-0.5">
+                Interview Kyllian Mbappé <span class="text-stone-500 font-normal text-xs">(in class, not in Madrid :-)</span>
+              </h4>
+              <p class="text-xs text-stone-600 mt-0.5">
+                📝 <b>Homework:</b> Ask these 6 questions to a star/famous person you admire (ตั้ง 6 คำถามสัมภาษณ์ดารา/คนดังที่คุณชื่นชม)
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="fillMbappeDemo()" class="px-4 py-2 rounded-xl bg-navy text-white text-xs font-semibold hover:bg-navyDark active:scale-95 transition shadow-xs">
+                ⚽ ดูตัวอย่างบทสัมภาษณ์ Kylian Mbappé
+              </button>
+              <button onclick="clearInterviewBuilder()" class="px-3 py-2 rounded-xl bg-white border border-stone-300 text-stone-600 text-xs font-semibold hover:bg-stone-100 transition">
+                ล้างฟอร์มแต่งเอง
+              </button>
+            </div>
+          </div>
+
+          <!-- Interactive Interview Builder -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl p-4 border border-stone-200 space-y-2.5 text-xs">
+              <div class="font-bold text-navy text-sm mb-1">✍️ ลองกรอกข้อมูลดาราในดวงใจของคุณ</div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-stone-500 block mb-1">1. ชื่อ (Je m'appelle...)</label>
+                  <input id="iv-name" type="text" placeholder="เช่น Lisa / Kylian Mbappé" oninput="updateInterviewScript()" class="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-navy outline-none" />
+                </div>
+                <div>
+                  <label class="text-stone-500 block mb-1">สัญชาติ (Je suis...)</label>
+                  <input id="iv-nat" type="text" placeholder="เช่น thaïlandaise / français" oninput="updateInterviewScript()" class="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-navy outline-none" />
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-stone-500 block mb-1">2. อายุ (J'ai ... ans)</label>
+                  <input id="iv-age" type="text" placeholder="เช่น vingt-sept" oninput="updateInterviewScript()" class="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-navy outline-none" />
+                </div>
+                <div>
+                  <label class="text-stone-500 block mb-1">3. เมือง + ประเทศ (à ... en/au ...)</label>
+                  <input id="iv-city" type="text" placeholder="เช่น à Paris en France" oninput="updateInterviewScript()" class="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-navy outline-none" />
+                </div>
+              </div>
+              <div>
+                <label class="text-stone-500 block mb-1">4. อาชีพ (Je suis...)</label>
+                <input id="iv-job" type="text" placeholder="เช่น footballeur / chanteuse" oninput="updateInterviewScript()" class="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-navy outline-none" />
+              </div>
+              <div>
+                <label class="text-stone-500 block mb-1">5. สิ่งที่ชอบ 3 อย่าง (J'aime le/la/les...)</label>
+                <input id="iv-likes" type="text" placeholder="เช่น le football, la musique et les voyages" oninput="updateInterviewScript()" class="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-navy outline-none" />
+              </div>
+              <div>
+                <label class="text-stone-500 block mb-1">6. ภาษาที่พูดได้ 3 ภาษา (Je parle...)</label>
+                <input id="iv-langs" type="text" placeholder="เช่น français, anglais et espagnol" oninput="updateInterviewScript()" class="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-navy outline-none" />
+              </div>
+            </div>
+
+            <!-- Live Generated Script -->
+            <div class="bg-navy text-white rounded-xl p-4 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-amber-300">🎤 บทสัมภาษณ์ภาษาฝรั่งเศสของคุณ</span>
+                  <div class="flex gap-1.5">
+                    <button onclick="speakInterviewScript()" class="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-xs font-semibold">🔊 ฟังทั้งหมด</button>
+                    <button onclick="copyInterviewScript()" class="px-2.5 py-1 rounded-lg bg-coral hover:bg-red-600 text-xs font-semibold">📋 คัดลอก</button>
+                  </div>
+                </div>
+                <div id="interview-script-output" class="font-fr text-xs sm:text-sm space-y-1.5 leading-relaxed text-blue-50"></div>
+              </div>
+              <div class="text-[11px] text-blue-200/80 mt-3 pt-2 border-t border-white/15">
+                💡 เคล็ดลับ: อย่าลืมว่าถามอายุใช้ <b>Quel âge tu as ? → J'ai ... ans</b> (มีอายุ...ปี) ไม่ใช้ Je suis!
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- 1.4 AVOIR + 8 Exact Sentences -->
+      <article id="sec-1-4" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-5">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">1.4 NEXT WEEK 21–22/10 • VERBE AVOIR (TO HAVE / มี)</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">การผันกริยา AVOIR (มี) & ประโยคตัวอย่างกับตัวเลข 1–30</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t1_avoir"></div>
+        </div>
+
+        <!-- AVOIR Conjugation Table -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-2">
+            <div class="text-xs font-bold text-stone-500 uppercase px-1">เอกพจน์ (Singulier)</div>
+            <button onclick="speakFrench('J\'ai')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between transition">
+              <span class="font-fr font-bold text-navy text-base">J' <span class="text-coral">AI</span></span>
+              <span class="text-xs text-stone-500">ฉันมี 🔊</span>
+            </button>
+            <button onclick="speakFrench('Tu as')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between transition">
+              <span class="font-fr font-bold text-navy text-base">Tu <span class="text-coral">AS</span></span>
+              <span class="text-xs text-stone-500">เธอมี 🔊</span>
+            </button>
+            <button onclick="speakFrench('Il a, elle a, on a')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between transition">
+              <span class="font-fr font-bold text-navy text-base">Il / elle / on <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">(N)</span> <span class="text-coral">A</span></span>
+              <span class="text-xs text-stone-500">เขา/เธอ/พวกเรามี 🔊</span>
+            </button>
+          </div>
+          <div class="space-y-2">
+            <div class="text-xs font-bold text-stone-500 uppercase px-1">พหูพจน์ (Pluriel) — เชื่อมเสียง Z ทุกตัว!</div>
+            <button onclick="speakFrench('Nous avons')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between transition">
+              <span class="font-fr font-bold text-navy text-base">Nous <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">(Z)</span> <span class="text-coral">AVONS</span></span>
+              <span class="text-xs text-stone-500">พวกเรามี 🔊</span>
+            </button>
+            <button onclick="speakFrench('Vous avez')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between transition">
+              <span class="font-fr font-bold text-navy text-base">Vous <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">(Z)</span> <span class="text-coral">AVEZ</span></span>
+              <span class="text-xs text-stone-500">คุณ/พวกคุณมี 🔊</span>
+            </button>
+            <button onclick="speakFrench('Ils ont, elles ont')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between transition">
+              <span class="font-fr font-bold text-navy text-base">Ils / elles <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">(Z)</span> <span class="text-coral">ONT</span></span>
+              <span class="text-xs text-stone-500">พวกเขามี 🔊</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Exact 8 Sentences -->
+        <div>
+          <h4 class="font-bold text-navy text-sm mb-3">📝 Create sentences with numbers (1 >> 30) and AVOIR — ครบทั้ง 8 ประโยคจากเอกสาร</h4>
+          <div id="avoir-sentences-grid" class="grid grid-cols-1 md:grid-cols-2 gap-2.5"></div>
+        </div>
+      </article>
+
+      <!-- 1.5 FAIRE + Sports + FYI Trap -->
+      <article id="sec-1-5" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-5">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">1.5 22/10 • VERBE FAIRE (TO DO / TO MAKE / ทำ)</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">การผันกริยา FAIRE และการใช้งาน (งานบ้าน / เรียน / กีฬา)</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t1_faire"></div>
+        </div>
+
+        <!-- FAIRE Table -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-2">
+            <button onclick="speakFrench('Je fais')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">Je <span class="text-coral">FAIS</span></span>
+              <span class="text-xs text-stone-500">ฉันทำ 🔊</span>
+            </button>
+            <button onclick="speakFrench('Tu fais')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">Tu <span class="text-coral">FAIS</span></span>
+              <span class="text-xs text-stone-500">เธอทำ 🔊</span>
+            </button>
+            <button onclick="speakFrench('Il fait, elle fait, on fait')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">Il <span class="text-coral">FAIT</span> / elle <span class="text-coral">FAIT</span> / on <span class="text-coral">FAIT</span></span>
+              <span class="text-xs text-stone-500">เขา/เธอ/พวกเราทำ 🔊</span>
+            </button>
+          </div>
+          <div class="space-y-2">
+            <button onclick="speakFrench('Nous faisons')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">Nous <span class="text-coral">FAISONS</span></span>
+              <span class="text-xs text-stone-500">พวกเราทำ (อ่าน เฟอ-ซง) 🔊</span>
+            </button>
+            <button onclick="speakFrench('Vous faites')" class="w-full p-3.5 rounded-xl bg-liaisonBg/60 border border-amber-300 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">Vous <span class="text-coral underline decoration-2">FAITES</span> <span class="text-[11px] bg-amber-200 text-liaisonText px-1.5 py-0.5 rounded ml-1">ระวัง! ไม่ใช่ -ez</span></span>
+              <span class="text-xs text-stone-600">คุณทำ 🔊</span>
+            </button>
+            <button onclick="speakFrench('Ils font, elles font')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">Ils / elles <span class="text-coral">FONT</span></span>
+              <span class="text-xs text-stone-500">พวกเขาทำ 🔊</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Categories of FAIRE -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Homework & Chores -->
+          <div class="rounded-2xl bg-paper p-4 border border-stone-200 space-y-2.5">
+            <div class="font-bold text-navy text-sm flex items-center gap-1.5"><span>🏠</span> งานบ้านและการบ้าน</div>
+            <div class="space-y-2 text-xs sm:text-sm">
+              <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-stone-100">
+                <div><b class="font-fr text-navy">Je fais mes devoirs</b><div class="text-stone-500 text-xs">= ...my homework (ฉันทำการบ้าน)</div></div>
+                <button onclick="speakFrench('Je fais mes devoirs')" class="p-2 rounded-lg hover:bg-stone-100">🔊</button>
+              </div>
+              <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-stone-100">
+                <div><b class="font-fr text-navy">Il fait le ménage (le nettoyage)</b><div class="text-stone-500 text-xs">= the cleaning (เขาทำความสะอาดบ้าน)</div></div>
+                <button onclick="speakFrench('Il fait le ménage. Le nettoyage.')" class="p-2 rounded-lg hover:bg-stone-100">🔊</button>
+              </div>
+              <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-stone-100">
+                <div><b class="font-fr text-navy">Nous faisons la lessive</b><div class="text-stone-500 text-xs">= the laundry (พวกเราซักผ้า)</div></div>
+                <button onclick="speakFrench('Nous faisons la lessive')" class="p-2 rounded-lg hover:bg-stone-100">🔊</button>
+              </div>
+              <div class="flex items-center justify-between bg-white p-2.5 rounded-xl border border-stone-100">
+                <div><b class="font-fr text-navy">Vous faites la cuisine</b><div class="text-stone-500 text-xs">= the cooking (คุณทำอาหาร)</div></div>
+                <button onclick="speakFrench('Vous faites la cuisine')" class="p-2 rounded-lg hover:bg-stone-100">🔊</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Studies + Sports -->
+          <div class="space-y-3">
+            <!-- Studies -->
+            <div class="rounded-2xl bg-paper p-4 border border-stone-200">
+              <div class="font-bold text-navy text-sm mb-2 flex items-center gap-1.5"><span>🎓</span> การเรียน (Studies)</div>
+              <div class="flex items-start justify-between bg-white p-3 rounded-xl border border-stone-100 gap-2">
+                <div>
+                  <div class="font-fr font-bold text-navy text-sm">Elle fait des études d'Histoire (d'Allemand / de Chinois....)</div>
+                  <div class="text-xs text-stone-500 mt-0.5">== studies of .... (เธอเรียนสาขาประวัติศาสตร์ / ภาษาเยอรมัน / ภาษาจีน...)</div>
+                </div>
+                <button onclick="speakFrench('Elle fait des études d\'Histoire, d\'Allemand, de Chinois')" class="p-2 rounded-lg hover:bg-stone-100 shrink-0">🔊</button>
+              </div>
+            </div>
+
+            <!-- Sports -->
+            <div class="rounded-2xl bg-paper p-4 border border-stone-200 space-y-2.5">
+              <div class="font-bold text-navy text-sm flex items-center gap-1.5"><span>🏸</span> กีฬา (...any sport >>>>> แยกเพศชัดเจน!)</div>
+              <div class="p-3 rounded-xl bg-mascBg/60 border border-blue-200 flex items-center justify-between gap-2">
+                <div>
+                  <span class="px-2 py-0.5 rounded bg-mascText text-white font-fr font-bold text-[11px]">MASCULIN • DU</span>
+                  <div class="font-fr font-bold text-navy text-sm mt-1">Il fait <span class="text-mascText">DU</span> badminton / <span class="text-mascText">du</span> tennis / <span class="text-mascText">du</span> basket-ball</div>
+                </div>
+                <button onclick="speakFrench('Il fait du badminton, du tennis, du basket-ball')" class="p-2 rounded-lg bg-white/80 hover:bg-white">🔊</button>
+              </div>
+              <div class="p-3 rounded-xl bg-femBg/60 border border-pink-200 flex items-center justify-between gap-2">
+                <div>
+                  <span class="px-2 py-0.5 rounded bg-femText text-white font-fr font-bold text-[11px]">FÉMININ • DE LA</span>
+                  <div class="font-fr font-bold text-navy text-sm mt-1">Elle fait <span class="text-femText">DE LA</span> danse / <span class="text-femText">de la</span> course (running) / <span class="text-femText">de la</span> pétanque</div>
+                </div>
+                <button onclick="speakFrench('Elle fait de la danse, de la course, de la pétanque')" class="p-2 rounded-lg bg-white/80 hover:bg-white">🔊</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FYI TRAP CALLOUT -->
+        <div class="rounded-2xl bg-red-50 border-2 border-coral/40 p-4 sm:p-5">
+          <div class="font-bold text-coral text-sm sm:text-base flex items-center gap-2 mb-2.5">
+            <span>⚠️</span> กล่องเตือนความจำสำคัญมาก (FYI Trap — ข้อสอบชอบออก!)
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="bg-white rounded-xl p-3.5 border border-pink-200 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-femText">เอกพจน์ (DE LA) = วิ่งออกกำลังกาย 🏃‍♀️</div>
+                <div class="font-fr font-extrabold text-navy text-base mt-0.5">Elle fait <span class="text-femText underline">DE LA</span> course</div>
+                <div class="text-xs text-stone-500">= running (ไม่มี s)</div>
+              </div>
+              <button onclick="speakFrench('Elle fait de la course')" class="p-2.5 rounded-xl bg-pink-50 hover:bg-pink-100">🔊</button>
+            </div>
+            <div class="bg-white rounded-xl p-3.5 border border-coral/30 flex items-center justify-between">
+              <div>
+                <div class="text-xs font-bold text-coral">พหูพจน์ (DES + s) = ช้อปปิ้ง/ซื้อของ 🛍️</div>
+                <div class="font-fr font-extrabold text-navy text-base mt-0.5">Elle fait <span class="text-coral underline">DES</span> course<span class="text-coral">s</span> (pluriel)</div>
+                <div class="text-xs text-stone-500">= she does some shopping (เติม s!)</div>
+              </div>
+              <button onclick="speakFrench('Elle fait des courses')" class="p-2.5 rounded-xl bg-red-50 hover:bg-red-100">🔊</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exercise Reference Badge -->
+        <div class="inline-flex flex-wrap items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-semibold text-emerald-900">
+          <span>✅</span>
+          <span class="font-fr">+ Masculin / feminine : exercice 1 et 2 page 13 • The articles • Done</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 2: 4 VERBS FINISH --ER + S'APPELER + 6 EXTRA VERBS                -->
+    <!-- ===================================================================== -->
+    <section id="tab-2" class="tab-panel hidden space-y-7">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-4 border-b border-stone-200">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-coral text-white text-xs font-fr font-semibold mb-2">4 VERBES IMPORTANTS FINISHING BY -ER</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-navy">กริยาลงท้ายด้วย -ER & S'appeler</h2>
+          <p class="text-sm text-stone-600 mt-1">จำสูตรเดียว ผันกริยาฝรั่งเศสได้มากกว่า 80% ของทั้งภาษา!</p>
+        </div>
+        <button onclick="switchTab(3)" class="self-start sm:self-auto px-4 py-2 rounded-xl bg-white border border-stone-200 text-navy text-xs font-semibold hover:bg-stone-50 shadow-xs">
+          บทถัดไป: บอกทาง & แมวอยู่ไหน →
+        </button>
+      </div>
+
+      <!-- 2.1 Golden Formula & Pronoun Guide -->
+      <article id="sec-2-1" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-5">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">2.1 THE GOLDEN -ER FORMULA</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">กฎทองของการผันกริยาลงท้าย -ER และ 2 ทริคออกเสียง</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t2_er_rule"></div>
+        </div>
+
+        <!-- Visual Formula -->
+        <div class="rounded-2xl bg-gradient-to-r from-navy to-[#2A4E7C] text-white p-5">
+          <div class="text-xs text-amber-300 font-bold uppercase mb-2">✨ สูตรลัด 2 ขั้นตอน</div>
+          <div class="flex flex-wrap items-center gap-2.5 text-sm sm:text-base font-fr">
+            <span class="px-3 py-1.5 rounded-xl bg-white/15 border border-white/25">PARL<s class="text-coral font-bold">ER</s> (ตัด -ER ทิ้ง)</span>
+            <span class="font-bold text-amber-300">→</span>
+            <span class="px-3 py-1.5 rounded-xl bg-white text-navy font-extrabold">รากศัพท์ (parl-)</span>
+            <span class="font-bold text-amber-300">+</span>
+            <div class="flex flex-wrap gap-1.5">
+              <span class="px-2.5 py-1 rounded-lg bg-coral font-bold text-xs">-e</span>
+              <span class="px-2.5 py-1 rounded-lg bg-coral font-bold text-xs">-es</span>
+              <span class="px-2.5 py-1 rounded-lg bg-coral font-bold text-xs">-e</span>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-400 text-navy font-bold text-xs">-ons</span>
+              <span class="px-2.5 py-1 rounded-lg bg-amber-400 text-navy font-bold text-xs">-ez</span>
+              <span class="px-2.5 py-1 rounded-lg bg-coral font-bold text-xs">-ent (ไม่ออกเสียง!)</span>
+            </div>
+          </div>
+          <div class="text-xs text-blue-100 mt-3">
+            💡 สังเกตไหมว่า 4 ตัวสีแดง (<b>Je, Tu, Il/elle/on, Ils/elles</b>) เวลาพูดออกเสียงเหมือนกันเป๊ะเลย เช่น <i>parle, parles, parle, parlent</i> ล้วนอ่านว่า <b>"ปาร์ล"</b>!
+          </div>
+        </div>
+
+        <!-- 2 Spelling & Pronunciation Tricks -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="rounded-xl bg-blue-50/70 border border-blue-200 p-4">
+            <div class="font-bold text-navy text-sm mb-1">1️⃣ ทริคลดรูป <span class="font-fr text-coral">Je → J'</span></div>
+            <p class="text-xs text-stone-700 leading-relaxed">
+              เมื่อกริยาขึ้นต้นด้วยสระ (<b>a, e, i, o, u, é</b>) หรือตัว <b>h</b> ไม่ออกเสียง ให้ลดรูป <b>Je</b> เป็น <b>J'</b> ทันที!<br/>
+              ตัวอย่าง: <b class="font-fr text-navy">J'aime</b> (ชอบ), <b class="font-fr text-navy">J'habite</b> (อาศัย), <b class="font-fr text-navy">J'écoute</b> (ฟัง)
+            </p>
+          </div>
+          <div class="rounded-xl bg-liaisonBg/70 border border-amber-300 p-4">
+            <div class="font-bold text-liaisonText text-sm mb-1">2️⃣ ทริคเชื่อมเสียง <span class="font-fr bg-amber-200 px-1.5 rounded">z</span> (Liaison)</div>
+            <p class="text-xs text-stone-700 leading-relaxed">
+              ประธาน <b>Nous, Vous, Ils, Elles</b> ลงท้ายด้วยตัว <b>s</b> เมื่อเจอกริยาขึ้นต้นด้วยสระหรือ <b>h</b> จะเชื่อมเสียงเป็น <b>"ซ" (z)</b>!<br/>
+              ตัวอย่าง: <b class="font-fr text-navy">Nous z aimons</b>, <b class="font-fr text-navy">Vous Z aimez</b>, <b class="font-fr text-navy">Ils/elles z habitent</b>
+            </p>
+          </div>
+        </div>
+
+        <!-- Exact Pronoun Table from File -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs sm:text-sm border-collapse">
+            <thead>
+              <tr class="bg-paper text-navy border-b border-stone-200">
+                <th class="text-left p-2.5 rounded-tl-xl">ประธาน (Pronom)</th>
+                <th class="text-left p-2.5">คำอธิบายภาษาอังกฤษจากเอกสาร</th>
+                <th class="text-left p-2.5">ความหมายภาษาไทย</th>
+                <th class="text-center p-2.5 rounded-tr-xl">หางกริยา -ER</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-100">
+              <tr><td class="p-2.5 font-fr font-bold text-navy">Je / J'</td><td class="p-2.5 font-fr text-stone-600">I</td><td class="p-2.5 text-stone-700">ฉัน</td><td class="p-2.5 text-center font-fr font-bold text-coral">-e</td></tr>
+              <tr><td class="p-2.5 font-fr font-bold text-navy">Tu</td><td class="p-2.5 font-fr text-stone-600">You (my friend)</td><td class="p-2.5 text-stone-700">เธอ (ใช้กับเพื่อน/คนสนิท)</td><td class="p-2.5 text-center font-fr font-bold text-coral">-es</td></tr>
+              <tr><td class="p-2.5 font-fr font-bold text-navy">Il / elle / on</td><td class="p-2.5 font-fr text-stone-600">He / she / someone</td><td class="p-2.5 text-stone-700">เขา / เธอ / พวกเรา-คนทั่วไป</td><td class="p-2.5 text-center font-fr font-bold text-coral">-e</td></tr>
+              <tr><td class="p-2.5 font-fr font-bold text-navy">Nous</td><td class="p-2.5 font-fr text-stone-600">We</td><td class="p-2.5 text-stone-700">พวกเรา</td><td class="p-2.5 text-center font-fr font-bold text-navy">-ons</td></tr>
+              <tr><td class="p-2.5 font-fr font-bold text-navy">Vous</td><td class="p-2.5 font-fr text-stone-600">You (guys / polite)</td><td class="p-2.5 text-stone-700">พวกคุณ / คุณ (แบบสุภาพ)</td><td class="p-2.5 text-center font-fr font-bold text-navy">-ez</td></tr>
+              <tr><td class="p-2.5 font-fr font-bold text-navy">Ils / elles</td><td class="p-2.5 font-fr text-stone-600">They (masc/fem)</td><td class="p-2.5 text-stone-700">พวกเขา (ชาย / หญิง)</td><td class="p-2.5 text-center font-fr font-bold text-coral">-ent</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <!-- 2.2 The 4 Important -ER Verbs -->
+      <article id="sec-2-2" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">2.2 4 VERBES IMPORTANTS FINISHING BY -ER</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">4 กริยาสำคัญลงท้ายด้วย -ER (แยกสีรากศัพท์ + หางกริยา + จุดเชื่อมเสียง z)</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t2_4verbs"></div>
+        </div>
+        <div id="four-er-verbs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </article>
+
+      <!-- 2.3 S'APPELER Special Verb -->
+      <article id="sec-2-3" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">2.3 REFLEXIVE VERB • S'APPELER</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">S'appeler = to be called / named (ชื่อว่า)</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t2_sappeler"></div>
+        </div>
+
+        <div class="rounded-xl bg-amber-50 border border-amber-200 p-3.5 text-xs sm:text-sm text-stone-700">
+          💡 <b>ทริคจำง่ายมาก:</b> ให้สังเกตตัว <b class="text-coral font-fr">ll</b> (เบิ้ล 2 ตัว) กับ <b class="text-navy font-fr">l</b> (ตัวเดียว) — ฝั่ง <b>Je, Tu, Il/elle, Ils/elles</b> ใช้ <b class="text-coral">ll</b> ทั้งหมด ส่วน <b>Nous, Vous</b> ใช้ <b class="text-navy">l ตัวเดียว</b> และมีเชื่อมเสียง <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText font-bold font-fr">z</span> ด้วย!
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="space-y-2">
+            <button onclick="speakFrench('Je m\'appelle')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">Je m'appe<span class="text-coral underline">ll</span>e</span>
+              <span class="text-xs text-stone-500">ฉันชื่อว่า 🔊</span>
+            </button>
+            <button onclick="speakFrench('Tu t\'appelles')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">Tu t'appe<span class="text-coral underline">ll</span>es</span>
+              <span class="text-xs text-stone-500">เธอชื่อว่า 🔊</span>
+            </button>
+            <button onclick="speakFrench('Il s\'appelle, elle s\'appelle')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">il (elle) s'appe<span class="text-coral underline">ll</span>e</span>
+              <span class="text-xs text-stone-500">เขา/เธอชื่อว่า 🔊</span>
+            </button>
+          </div>
+          <div class="space-y-2">
+            <button onclick="speakFrench('Nous nous appelons')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">nous nous <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">z</span> appe<span class="text-blue-700 underline">l</span>ons</span>
+              <span class="text-xs text-stone-500">พวกเราชื่อว่า 🔊</span>
+            </button>
+            <button onclick="speakFrench('Vous vous appelez')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">vous vous <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">z</span> appe<span class="text-blue-700 underline">l</span>ez</span>
+              <span class="text-xs text-stone-500">คุณ/พวกคุณชื่อว่า 🔊</span>
+            </button>
+            <button onclick="speakFrench('Ils s\'appellent, elles s\'appellent')" class="w-full p-3.5 rounded-xl bg-paper border border-stone-200 hover:border-navy flex items-center justify-between">
+              <span class="font-fr font-bold text-navy">ils (elles) s'appe<span class="text-coral underline">ll</span>ent</span>
+              <span class="text-xs text-stone-500">พวกเขาชื่อว่า 🔊</span>
+            </button>
+          </div>
+        </div>
+      </article>
+
+      <!-- 2.4 Interactive Extra 6 -ER Verbs Conjugator -->
+      <article id="sec-2-4" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">2.4 EXTRA 6 -ER VERBS • INTERACTIVE CONJUGATOR</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">กริยาลงท้าย -ER เพิ่มเติมอีก 6 คำ (คลิกเพื่อดูตารางผันและฟังเสียง!)</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t2_extra6"></div>
+        </div>
+
+        <div id="extra-er-selector" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5"></div>
+        <div id="extra-er-display" class="rounded-2xl bg-paper border border-stone-200 p-4 sm:p-5"></div>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 3: LESSONS 28-29 OCT & 4-5 NOV                                    -->
+    <!-- ===================================================================== -->
+    <section id="tab-3" class="tab-panel hidden space-y-7">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-4 border-b border-stone-200">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-emerald-700 text-white text-xs font-fr font-semibold mb-2">LESSONS 28.29 OCT + 4.5 NOV</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-navy">บทเรียน 28–29 ต.ค. & 4–5 พ.ย.</h2>
+          <p class="text-sm text-stone-600 mt-1">ถาม-บอกทาง (Bureau 42), 4 กริยาบอกทาง, ตัวเลข 30–69, เลขลำดับที่ 1er–69e, บุพบท (Où est le chat ?)</p>
+        </div>
+        <button onclick="switchTab(4)" class="self-start sm:self-auto px-4 py-2 rounded-xl bg-coral text-white text-xs font-semibold hover:bg-red-600 shadow-xs">
+          ไปฝึก Flashcards & Quiz →
+        </button>
+      </div>
+
+      <!-- 3.1 VIDEO: Où est le bureau 42? + Interactive Mini Map -->
+      <article id="sec-3-1" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-5">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">3.1 VIDEO: OÙ EST LE BUREAU 42? • PDF PAGE 35</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">การถามทางและบอกทาง (ครบทั้ง 9 ประโยคจากเอกสาร)</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t3_directions"></div>
+        </div>
+
+        <!-- Interactive Bureau 42 Mini-Map -->
+        <div class="rounded-2xl bg-paper border border-stone-200 p-4 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="text-xs sm:text-sm font-bold text-navy">🗺️ แผนที่จำลองทางไป Bureau 42 — กดปุ่มบอกทางเพื่อดูเส้นทางและฟังเสียง!</div>
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="highlightMapStep('straight')" class="map-btn px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-xs font-semibold text-navy hover:bg-navy hover:text-white transition">⬆️ Tout droit</button>
+              <button onclick="highlightMapStep('left')" class="map-btn px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-xs font-semibold text-navy hover:bg-navy hover:text-white transition">⬅️ À gauche</button>
+              <button onclick="highlightMapStep('right')" class="map-btn px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-xs font-semibold text-navy hover:bg-navy hover:text-white transition">➡️ À droite</button>
+              <button onclick="highlightMapStep('end')" class="map-btn px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-xs font-semibold text-navy hover:bg-navy hover:text-white transition">🏁 Au bout du couloir</button>
+              <button onclick="highlightMapStep('hereThere')" class="map-btn px-3 py-1.5 rounded-xl bg-white border border-stone-300 text-xs font-semibold text-navy hover:bg-navy hover:text-white transition">📍 Ici / Là</button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-stone-200 p-3 overflow-hidden">
+            <svg viewBox="0 0 640 210" class="w-full h-auto max-h-52">
+              <!-- Office floor -->
+              <rect x="0" y="0" width="640" height="210" rx="14" fill="#F8FAFC"/>
+              <!-- Corridor walls -->
+              <path d="M240 200 L240 110 L70 110 L70 60 L570 60 L570 110 L360 110 L360 200 Z" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/>
+              <!-- Left Room -->
+              <rect x="20" y="55" width="65" height="60" rx="8" fill="#DBEAFE" stroke="#1D4ED8" stroke-width="2"/>
+              <text x="52" y="83" text-anchor="middle" font-size="11" font-weight="700" fill="#1D4ED8">Salle 40</text>
+              <text x="52" y="99" text-anchor="middle" font-size="9" fill="#1E3A5F">À GAUCHE</text>
+              <!-- Right End Room: Bureau 42 -->
+              <rect id="map-b42" x="545" y="50" width="82" height="68" rx="10" fill="#FEE2E2" stroke="#E63946" stroke-width="2.5"/>
+              <text x="586" y="80" text-anchor="middle" font-size="12" font-weight="800" fill="#E63946">BUREAU 42</text>
+              <text x="586" y="97" text-anchor="middle" font-size="10" font-weight="700" fill="#1E3A5F">Il est LÀ! 🚪</text>
+
+              <!-- Route Highlights -->
+              <line id="route-straight" x1="300" y1="185" x2="300" y2="85" stroke="#1E3A5F" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 6" opacity="0.25"/>
+              <line id="route-left" x1="300" y1="85" x2="95" y2="85" stroke="#2563EB" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 6" opacity="0.2"/>
+              <line id="route-right" x1="300" y1="85" x2="535" y2="85" stroke="#E63946" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 6" opacity="0.25"/>
+
+              <!-- You Are Here Pin -->
+              <circle id="pin-ici" cx="300" cy="180" r="14" fill="#1E3A5F"/>
+              <text x="300" y="184" text-anchor="middle" font-size="11" fill="white" font-weight="700">ICI</text>
+              <text x="360" y="184" font-size="11" fill="#475569" font-weight="600">← C'est ICI (คุณอยู่ตรงนี้)</text>
+              <text x="315" y="142" font-size="11" fill="#1E3A5F" font-weight="700">TOUT DROIT ↑</text>
+              <text x="415" y="47" text-anchor="middle" font-size="11" fill="#E63946" font-weight="700">AU BOUT DU couloir →</text>
+            </svg>
+            <div id="map-caption" class="text-center text-xs sm:text-sm font-semibold text-navy mt-2 py-1.5 px-3 rounded-lg bg-paper">
+              คลิกปุ่มด้านบนเพื่อจำลองเส้นทางไปยัง Bureau 42
+            </div>
+          </div>
+        </div>
+
+        <!-- All 9 Exact Direction Phrases -->
+        <div id="direction-phrases-grid" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+      </article>
+
+      <!-- 3.2 Four Direction Verbs -->
+      <article id="sec-3-2" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">3.2 FOUR ESSENTIAL VERBS</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">ตารางผัน 4 กริยาสำคัญ: ALLER, CONNAÎTRE, TOURNER, CHERCHER</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t3_4verbs"></div>
+        </div>
+        <div id="direction-4verbs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </article>
+
+      <!-- 3.3 Numbers 30 to 69 -->
+      <article id="sec-3-3" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-4">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">3.3 THE NUMBERS / LES NOMBRES : 30 >> 69</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">ตัวเลข 30 ถึง 69 — จำแค่ 4 แม่หลัก + กฎ "ET un"</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t3_numbers30_69"></div>
+        </div>
+
+        <!-- 4 Tens Summary -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <button onclick="speakFrench('trente, trente et un, trente-deux')" class="text-left p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 hover:border-navy transition">
+            <div class="font-fr font-extrabold text-navy text-lg">30 Trente 🔊</div>
+            <div class="text-xs text-stone-600 mt-1">trente <b class="text-coral">ET un</b> / trente deux...</div>
+          </button>
+          <button onclick="speakFrench('quarante, quarante et un')" class="text-left p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 hover:border-navy transition">
+            <div class="font-fr font-extrabold text-navy text-lg">40 Quarante 🔊</div>
+            <div class="text-xs text-stone-600 mt-1">quarante <b class="text-coral">ET un</b> ... >>>></div>
+          </button>
+          <button onclick="speakFrench('cinquante, cinquante et un')" class="text-left p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 hover:border-navy transition">
+            <div class="font-fr font-extrabold text-navy text-lg">50 Cinquante 🔊</div>
+            <div class="text-xs text-stone-600 mt-1">cinquante <b class="text-coral">ET un</b> ... >>></div>
+          </button>
+          <button onclick="speakFrench('soixante, soixante et un, soixante-neuf')" class="text-left p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 hover:border-navy transition">
+            <div class="font-fr font-extrabold text-navy text-lg">60 Soixante 🔊</div>
+            <div class="text-xs text-stone-600 mt-1">soixante <b class="text-coral">ET un</b> ... >> soixante-neuf</div>
+          </button>
+        </div>
+
+        <!-- Interactive 30-69 Number Display & Grid -->
+        <div class="rounded-2xl bg-paper border border-stone-200 p-4 space-y-3">
+          <div id="num-30-69-banner" class="flex flex-wrap items-center justify-between gap-2 bg-navy text-white rounded-xl px-4 py-3">
+            <div>
+              <span class="text-xs text-blue-200">คลิกตัวเลขด้านล่างเพื่อดูคำสะกดและฟังเสียง</span>
+              <div id="num-30-69-text" class="font-fr font-extrabold text-xl text-amber-300">42 = quarante-deux</div>
+            </div>
+            <button id="num-30-69-speak" onclick="speakFrench('quarante-deux')" class="px-4 py-2 rounded-xl bg-coral hover:bg-red-600 text-xs font-bold">🔊 ฟังเสียง</button>
+          </div>
+          <div id="grid-numbers-30-69" class="grid grid-cols-5 sm:grid-cols-10 gap-2"></div>
+        </div>
+      </article>
+
+      <!-- 3.4 Ordinal Numbers 1st to 69th -->
+      <article id="sec-3-4" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-5">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">3.4 INDICATE AN ORDER (1st >>>> 69th)</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">เลขลำดับที่ (1er ถึง 69e) + เครื่องสร้างลำดับที่อัตโนมัติ</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t3_ordinals"></div>
+        </div>
+
+        <!-- Core Rules -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="rounded-xl p-4 bg-paper border border-stone-200">
+            <div class="font-bold text-navy text-sm mb-1.5">🥇 ลำดับที่ 1 (Le 1er) — แยกเพศชาย / หญิง!</div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="speakFrench('le premier')" class="px-3 py-1.5 rounded-lg bg-mascBg text-mascText font-fr font-bold text-xs border border-blue-200">masc: le premier 🔊</button>
+              <button onclick="speakFrench('la première')" class="px-3 py-1.5 rounded-lg bg-femBg text-femText font-fr font-bold text-xs border border-pink-200">fem: la première 🔊</button>
+            </div>
+          </div>
+          <div class="rounded-xl p-4 bg-paper border border-stone-200">
+            <div class="font-bold text-navy text-sm mb-1.5">🥈 ลำดับที่ 2 เป็นต้นไป (2e → 69e) — เพศชายและหญิงเหมือนกัน!</div>
+            <p class="text-xs text-stone-600 leading-relaxed">
+              masc & fem <b>SIMILAR</b> >>> ใช้ <span class="font-fr font-bold text-navy">le / la + ตัวเลข + ième</span> (ถ้าลงท้ายด้วย -e ให้ตัด e ออกก่อน เช่น <i>quatre → quatrième</i> และเลข 9 เปลี่ยน <b>f → v</b> เป็น <b>neuvième</b>!)
+            </p>
+          </div>
+        </div>
+
+        <!-- Interactive Ordinal Slider (1-69) -->
+        <div class="rounded-2xl bg-gradient-to-br from-navy to-navyDark text-white p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div class="text-xs text-amber-300 font-bold">🎛️ ลากแถบหรือคลิกเลขสำคัญเพื่อดูลำดับที่ 1 ถึง 69</div>
+              <div class="flex items-baseline gap-3 mt-1">
+                <span id="ord-badge" class="text-3xl font-fr font-extrabold text-amber-300">69e</span>
+                <span id="ord-main-text" class="text-lg sm:text-xl font-fr font-bold">le / la soixante-neuvième</span>
+              </div>
+              <div id="ord-note-text" class="text-xs text-blue-200 mt-1">โน้ตอาจารย์: la 69ème Avenue = la soixSSante neuf Vième avenue</div>
+            </div>
+            <button id="ord-speak-btn" onclick="speakCurrentOrdinal()" class="px-4 py-2.5 rounded-xl bg-coral hover:bg-red-600 text-xs sm:text-sm font-bold shadow-md">🔊 ฟังเสียงลำดับนี้</button>
+          </div>
+
+          <input id="ordinal-slider" type="range" min="1" max="69" value="69" oninput="updateOrdinalExplorer(this.value)" class="w-full accent-amber-400 cursor-pointer" />
+
+          <!-- Quick Jump Chips for EVERY PDF Example -->
+          <div class="flex flex-wrap gap-1.5">
+            <span class="text-[11px] text-blue-200 mr-1 self-center">ตัวอย่างจากเอกสาร:</span>
+            <button onclick="setOrdinal(1)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">1er</button>
+            <button onclick="setOrdinal(2)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">2e</button>
+            <button onclick="setOrdinal(3)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">3e</button>
+            <button onclick="setOrdinal(4)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">4e</button>
+            <button onclick="setOrdinal(5)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">5e</button>
+            <button onclick="setOrdinal(6)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">6e</button>
+            <button onclick="setOrdinal(9)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">9e</button>
+            <button onclick="setOrdinal(10)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">10e</button>
+            <button onclick="setOrdinal(20)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">20e</button>
+            <button onclick="setOrdinal(21)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">21e</button>
+            <button onclick="setOrdinal(22)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">22e</button>
+            <button onclick="setOrdinal(30)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">30e</button>
+            <button onclick="setOrdinal(39)" class="ord-chip px-2.5 py-1 rounded-lg bg-white/15 hover:bg-amber-400 hover:text-navy text-xs font-fr font-bold transition">39e</button>
+            <button onclick="setOrdinal(69)" class="ord-chip px-2.5 py-1 rounded-lg bg-amber-400 text-navy text-xs font-fr font-bold transition">69e Ave</button>
+          </div>
+        </div>
+
+        <!-- Exact Table of All PDF Ordinal Notes -->
+        <div id="pdf-ordinals-table" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5"></div>
+      </article>
+
+      <!-- 3.5 Prepositions in Space & Interactive "Où est le chat ?" Room -->
+      <article id="sec-3-5" class="bg-white rounded-2xl p-5 sm:p-6 shadow-card border border-stone-200/80 space-y-5">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <span class="text-xs font-fr font-bold text-coral uppercase tracking-wider">3.5 PREPOSITIONS IN SPACE • OÙ EST LE CHAT ?</span>
+            <h3 class="text-lg sm:text-xl font-bold text-navy mt-0.5">บุพบทบอกตำแหน่ง + ห้องแมวจำลอง (กดย้ายน้องแมวได้จริง!)</h3>
+          </div>
+          <div class="mastery-slot" data-topic="t3_prepositions"></div>
+        </div>
+
+        <!-- 5 Key Nouns -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <button onclick="speakFrench('le chat')" class="p-3 rounded-xl bg-mascBg/60 border border-blue-200 text-center hover:scale-[1.02] transition">
+            <div class="text-2xl">🐱</div>
+            <div class="font-fr font-bold text-mascText text-sm mt-1">le chat</div>
+            <div class="text-[11px] text-stone-600">the cat (แมว) 🔊</div>
+          </button>
+          <button onclick="speakFrench('le chien')" class="p-3 rounded-xl bg-mascBg/60 border border-blue-200 text-center hover:scale-[1.02] transition">
+            <div class="text-2xl">🐶</div>
+            <div class="font-fr font-bold text-mascText text-sm mt-1">le chien</div>
+            <div class="text-[11px] text-stone-600">the dog (หมา) 🔊</div>
+          </button>
+          <button onclick="speakFrench('le lit')" class="p-3 rounded-xl bg-mascBg/60 border border-blue-200 text-center hover:scale-[1.02] transition">
+            <div class="text-2xl">🛏️</div>
+            <div class="font-fr font-bold text-mascText text-sm mt-1">le lit</div>
+            <div class="text-[11px] text-stone-600">the bed (เตียง) 🔊</div>
+          </button>
+          <button onclick="speakFrench('la lampe')" class="p-3 rounded-xl bg-femBg/60 border border-pink-200 text-center hover:scale-[1.02] transition">
+            <div class="text-2xl">💡</div>
+            <div class="font-fr font-bold text-femText text-sm mt-1">la lampe</div>
+            <div class="text-[11px] text-stone-600">the lamp (โคมไฟ) 🔊</div>
+          </button>
+          <button onclick="speakFrench('la chaise')" class="col-span-2 sm:col-span-1 p-3 rounded-xl bg-femBg/60 border border-pink-200 text-center hover:scale-[1.02] transition">
+            <div class="text-2xl">🪑</div>
+            <div class="font-fr font-bold text-femText text-sm mt-1">la chaise</div>
+            <div class="text-[11px] text-stone-600">the chair (เก้าอี้) 🔊</div>
+          </button>
+        </div>
+
+        <!-- INTERACTIVE CAT ROOM VISUALIZER -->
+        <div class="rounded-2xl bg-paper border border-stone-200 p-4 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="font-bold text-navy text-sm sm:text-base">🐾 ห้องจำลอง "Où est le chat ?"</div>
+              <div class="text-xs text-coral font-semibold">⚠️ อย่าลืมกริยา <b>EST</b> (= is / อยู่) ทุกครั้ง! เช่น LE CHAT <b>EST</b> DANS LE LIT</div>
+            </div>
+            <button id="cat-speak-btn" onclick="speakCurrentCatSentence()" class="px-4 py-2 rounded-xl bg-navy text-white text-xs font-bold hover:bg-navyDark">🔊 ฟังประโยคนี้</button>
+          </div>
+
+          <!-- Active Sentence Banner -->
+          <div id="cat-sentence-banner" class="rounded-xl bg-white border-2 border-navy/20 p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div id="cat-fr-sentence" class="font-fr font-extrabold text-lg text-navy">LE CHAT <span class="text-coral underline">EST</span> DANS LE LIT</div>
+              <div id="cat-th-sentence" class="text-xs sm:text-sm text-stone-600">แมวอยู่ในเตียง (DANS LE = in / ใน)</div>
+            </div>
+            <span id="cat-badge" class="self-start sm:self-center px-3 py-1 rounded-full bg-mascBg text-mascText text-xs font-bold font-fr">DANS LE (in)</span>
+          </div>
+
+          <!-- Room SVG Canvas -->
+          <div class="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-inner">
+            <svg viewBox="0 0 680 300" class="w-full h-auto">
+              <!-- Wall & Floor -->
+              <rect x="0" y="0" width="680" height="205" fill="#FFFDF8"/>
+              <rect x="0" y="205" width="680" height="95" fill="#F1E6D2"/>
+              <line x1="0" y1="205" x2="680" y2="205" stroke="#DECBB0" stroke-width="3"/>
+
+              <!-- Hallway door on far right (for AU BOUT DU) -->
+              <rect x="595" y="75" width="66" height="130" rx="6" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/>
+              <rect x="605" y="88" width="46" height="117" rx="3" fill="#CBD5E1"/>
+              <text x="628" y="65" text-anchor="middle" font-size="10" font-weight="700" fill="#475569">au bout du</text>
+
+              <!-- Window -->
+              <rect x="235" y="24" width="110" height="75" rx="8" fill="#E0F2FE" stroke="#93C5FD" stroke-width="3"/>
+              <line x1="290" y1="24" x2="290" y2="99" stroke="#93C5FD" stroke-width="2.5"/>
+              <line x1="235" y1="62" x2="345" y2="62" stroke="#93C5FD" stroke-width="2.5"/>
+
+              <!-- CHAIR (la chaise) on far left -->
+              <g id="obj-chair" transform="translate(55, 138)">
+                <rect x="6" y="0" width="54" height="45" rx="6" fill="#F9A8D4" stroke="#BE185D" stroke-width="2"/>
+                <rect x="2" y="42" width="62" height="12" rx="4" fill="#EC4899" stroke="#BE185D" stroke-width="2"/>
+                <line x1="10" y1="54" x2="10" y2="92" stroke="#9D174D" stroke-width="5" stroke-linecap="round"/>
+                <line x1="56" y1="54" x2="56" y2="92" stroke="#9D174D" stroke-width="5" stroke-linecap="round"/>
+                <text x="33" y="108" text-anchor="middle" font-size="11" font-weight="700" fill="#BE185D">la chaise</text>
+              </g>
+
+              <!-- Cat Layer BEHIND Bed (rendered before bed when behind) -->
+              <g id="cat-back-layer"></g>
+
+              <!-- BED (le lit) center-left -->
+              <g id="obj-bed" transform="translate(185, 135)">
+                <!-- Headboard -->
+                <rect x="0" y="0" width="175" height="58" rx="10" fill="#1E3A5F"/>
+                <!-- Pillow -->
+                <rect x="18" y="24" width="60" height="24" rx="10" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+                <rect x="92" y="24" width="60" height="24" rx="10" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>
+                <!-- Mattress & Blanket -->
+                <rect x="-4" y="48" width="183" height="42" rx="8" fill="#60A5FA" stroke="#1D4ED8" stroke-width="2"/>
+                <rect x="-4" y="64" width="183" height="26" rx="6" fill="#3B82F6"/>
+                <!-- Legs -->
+                <rect x="6" y="90" width="12" height="28" rx="3" fill="#1E3A5F"/>
+                <rect x="157" y="90" width="12" height="28" rx="3" fill="#1E3A5F"/>
+                <!-- Space under bed -->
+                <text x="88" y="132" text-anchor="middle" font-size="12" font-weight="700" fill="#1D4ED8">le lit</text>
+              </g>
+
+              <!-- LAMP (la lampe) right of bed -->
+              <g id="obj-lamp" transform="translate(420, 108)">
+                <polygon points="10,0 58,0 68,44 0,44" fill="#FDE68A" stroke="#D97706" stroke-width="2"/>
+                <line x1="34" y1="44" x2="34" y2="112" stroke="#92400E" stroke-width="6" stroke-linecap="round"/>
+                <ellipse cx="34" cy="116" rx="22" ry="7" fill="#B45309"/>
+                <text x="34" y="138" text-anchor="middle" font-size="11" font-weight="700" fill="#BE185D">la lampe</text>
+              </g>
+
+              <!-- DOG (le chien) near right -->
+              <g id="obj-dog" transform="translate(508, 196)">
+                <ellipse cx="32" cy="36" rx="26" ry="18" fill="#D97706"/>
+                <circle cx="52" cy="20" r="15" fill="#B45309"/>
+                <ellipse cx="44" cy="18" rx="5" ry="10" fill="#78350F"/>
+                <circle cx="57" cy="17" r="2.5" fill="#111827"/>
+                <circle cx="65" cy="22" r="3" fill="#111827"/>
+                <text x="36" y="70" text-anchor="middle" font-size="11" font-weight="700" fill="#1D4ED8">le chien</text>
+              </g>
+
+              <!-- Animated CAT Sprite (le chat) -->
+              <g id="cat-sprite" transform="translate(250, 178)">
+                <!-- Tail -->
+                <path d="M-2 32 Q-18 18 -10 6" fill="none" stroke="#F97316" stroke-width="6" stroke-linecap="round"/>
+                <!-- Body -->
+                <ellipse cx="22" cy="32" rx="21" ry="15" fill="#FB923C" stroke="#C2410C" stroke-width="2"/>
+                <!-- Head -->
+                <circle cx="22" cy="12" r="14" fill="#FB923C" stroke="#C2410C" stroke-width="2"/>
+                <!-- Ears -->
+                <polygon points="10,4 14,-8 20,2" fill="#FB923C" stroke="#C2410C" stroke-width="1.8"/>
+                <polygon points="34,4 30,-8 24,2" fill="#FB923C" stroke="#C2410C" stroke-width="1.8"/>
+                <!-- Eyes & Nose -->
+                <circle cx="17" cy="11" r="2.2" fill="#1E293B"/>
+                <circle cx="27" cy="11" r="2.2" fill="#1E293B"/>
+                <polygon points="20,15 24,15 22,18" fill="#E63946"/>
+                <!-- Label tag -->
+                <rect x="-4" y="48" width="52" height="16" rx="8" fill="#1E3A5F"/>
+                <text x="22" y="59" text-anchor="middle" font-size="9.5" font-weight="700" fill="#FFFFFF">le chat</text>
+              </g>
+            </svg>
+          </div>
+
+          <!-- Preposition Control Buttons -->
+          <div id="cat-buttons-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2"></div>
+        </div>
+
+        <!-- Preposition Opposites Cheat Table + DU vs DE LA explanation -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div class="lg:col-span-2 rounded-2xl bg-paper border border-stone-200 p-4 space-y-2.5">
+            <div class="font-bold text-navy text-sm">📌 ตารางคู่ตรงข้ามบุพบท (Preposition Pairs จากเอกสาร)</div>
+            <div class="space-y-2 text-xs sm:text-sm">
+              <div class="bg-white p-2.5 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
+                <span><b class="font-fr text-navy">À GAUCHE DU / DE LA</b> (ซ้ายของ)</span>
+                <span class="text-coral font-bold">###</span>
+                <span><b class="font-fr text-navy">À DROITE DU / DE LA</b> (ขวาของ)</span>
+              </div>
+              <div class="bg-white p-2.5 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
+                <span><b class="font-fr text-navy">SUR LE / LA...</b> (= on / บน)</span>
+                <span class="text-coral font-bold">###</span>
+                <span><b class="font-fr text-navy">SOUS LE / LA...</b> (= under / ใต้)</span>
+              </div>
+              <div class="bg-white p-2.5 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
+                <span><b class="font-fr text-navy">DERRIÈRE LE...</b> (= behind / หลัง)</span>
+                <span class="text-coral font-bold">###</span>
+                <span><b class="font-fr text-navy">DEVANT LE...</b> (= in front of / หน้า)</span>
+              </div>
+              <div class="bg-white p-2.5 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
+                <span><b class="font-fr text-navy">DANS LE...</b> (= in / ใน)</span>
+                <span class="text-stone-400 font-bold">///</span>
+                <span><b class="font-fr text-navy">SUR LE...</b> (= on the... / บน)</span>
+              </div>
+              <div class="bg-white p-2.5 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2">
+                <span><b class="font-fr text-navy">À CÔTÉ DU / DE LA</b> (= near / next to / ข้างๆ)</span>
+                <span class="text-stone-400 font-bold">•</span>
+                <span><b class="font-fr text-navy">AU BOUT DU / DE LA</b> (= at the end of / สุดทางของ)</span>
+              </div>
+              <div class="bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                <b class="font-fr text-navy">Le chat est ENTRE LE...1... ET LA...2...</b> (= between ..1.. and ..2..)<br/>
+                <span class="text-xs text-stone-600">ตัวอย่าง: <b>Le chat est ENTRE le lit ET la lampe</b> • <em class="text-liaisonText">(โน้ตอาจารย์: to be explained and practiced next week)</em></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- DU vs DE LA Rule Box -->
+          <div class="rounded-2xl bg-gradient-to-b from-blue-50 to-pink-50 border border-stone-200 p-4 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="font-bold text-navy text-sm mb-2">🧠 เมื่อไหร่ใช้ <span class="text-mascText">DU</span> vs <span class="text-femText">DE LA</span> ?</div>
+              <p class="text-xs text-stone-700 leading-relaxed mb-3">
+                บุพบทที่มีคำว่า <b>"ของ" (de)</b> ได้แก่ <b>à gauche, à droite, à côté, au bout</b> ต้องผันตามเพศของคำนามที่ตามมา:
+              </p>
+              <div class="space-y-2 text-xs">
+                <div class="p-2.5 rounded-xl bg-white border border-blue-200">
+                  <div class="font-fr font-bold text-mascText">de + le  ➜  DU (เพศชาย)</div>
+                  <div class="text-stone-600 mt-0.5">à côté <b>DU</b> chien (le chien)</div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white border border-pink-200">
+                  <div class="font-fr font-bold text-femText">de + la  ➜  DE LA (เพศหญิง)</div>
+                  <div class="text-stone-600 mt-0.5">à droite <b>DE LA</b> lampe (la lampe)</div>
+                </div>
+              </div>
+            </div>
+            <div class="text-[11px] text-stone-600 bg-white/80 p-2.5 rounded-xl border border-stone-200">
+              ส่วน <b>SUR, SOUS, DANS, DEVANT, DERRIÈRE, ENTRE</b> ใช้ <b>LE / LA</b> ตรงๆ เลย ไม่ต้องมี de!
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 4: PRACTICE — FLASHCARDS & SMART QUIZ                             -->
+    <!-- ===================================================================== -->
+    <section id="tab-4" class="tab-panel hidden space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-4 border-b border-stone-200">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-coral text-white text-xs font-fr font-semibold mb-2">INTERACTIVE PRACTICE</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-navy">ฝึกจำ & ทดสอบความเข้าใจ</h2>
+          <p class="text-sm text-stone-600 mt-1">ทบทวนด้วย Flashcards พลิก 3 มิติ และแบบทดสอบวัดผลพร้อมเฉลยละเอียดทุกข้อ</p>
+        </div>
+        <!-- Mode Switcher -->
+        <div class="inline-flex bg-white p-1.5 rounded-2xl border border-stone-200 shadow-xs self-start">
+          <button id="btn-mode-flash" onclick="switchPracticeMode('flashcards')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-navy text-white transition">🃏 Flashcards</button>
+          <button id="btn-mode-quiz" onclick="switchPracticeMode('quiz')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-bold text-stone-600 hover:text-navy transition">📝 แบบทดสอบ (Quiz)</button>
+        </div>
+      </div>
+
+      <!-- MODE A: FLASHCARDS -->
+      <div id="practice-flashcards" class="space-y-5">
+        <!-- Filter Pills -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div id="fc-filters" class="flex flex-wrap gap-1.5"></div>
+          <div class="flex items-center gap-2 text-xs">
+            <span id="fc-known-badge" class="px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-800 font-bold">จำได้แล้ว: 0</span>
+            <button onclick="shuffleFlashcards()" class="px-3 py-1.5 rounded-xl bg-white border border-stone-200 hover:bg-stone-100 font-semibold text-navy">🔀 สลับการ์ด</button>
+          </div>
+        </div>
+
+        <!-- 3D Card Area -->
+        <div class="max-w-xl mx-auto">
+          <div class="perspective-1000 h-72 sm:h-80 cursor-pointer select-none" onclick="flipFlashcard()">
+            <div id="flashcard-inner" class="flashcard-inner">
+              <!-- Front -->
+              <div class="flashcard-face bg-white rounded-3xl shadow-soft border-2 border-stone-200 p-6 sm:p-8 flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span id="fc-cat-badge" class="px-3 py-1 rounded-full bg-navy/10 text-navy text-xs font-bold">หมวดหมู่</span>
+                  <span id="fc-counter" class="text-xs font-semibold text-stone-400">1 / 40</span>
+                </div>
+                <div class="text-center my-auto px-2">
+                  <div id="fc-front-text" class="font-fr font-extrabold text-2xl sm:text-3xl text-navy leading-snug">...</div>
+                  <div id="fc-front-sub" class="text-xs text-liaisonText font-semibold mt-2"></div>
+                </div>
+                <div class="flex items-center justify-between">
+                  <button onclick="event.stopPropagation(); speakCurrentFlashcard()" class="px-3.5 py-2 rounded-xl bg-paper border border-stone-200 hover:bg-navy hover:text-white text-xs font-bold transition">🔊 ฟังเสียง</button>
+                  <span class="text-xs text-stone-400">แตะการ์ดเพื่อพลิกดูคำแปล ↻</span>
+                </div>
+              </div>
+              <!-- Back -->
+              <div class="flashcard-face flashcard-back bg-gradient-to-br from-navy to-navyDark text-white rounded-3xl shadow-soft p-6 sm:p-8 flex flex-col justify-between">
+                <div class="flex items-center justify-between">
+                  <span class="px-3 py-1 rounded-full bg-white/15 text-amber-300 text-xs font-bold">คำแปล & ทริคช่วยจำ</span>
+                  <button onclick="event.stopPropagation(); speakCurrentFlashcard()" class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-semibold">🔊 ฟังอีกครั้ง</button>
+                </div>
+                <div class="text-center my-auto space-y-2.5">
+                  <div id="fc-back-th" class="text-xl sm:text-2xl font-bold text-white">...</div>
+                  <div id="fc-back-en" class="font-fr text-sm text-blue-200">...</div>
+                  <div id="fc-back-tip" class="inline-block px-3 py-1.5 rounded-xl bg-white/10 text-xs text-amber-200 mt-1"></div>
+                </div>
+                <div class="text-center text-xs text-blue-200/80">แตะเพื่อพลิกกลับ</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Controls -->
+          <div class="flex items-center justify-center gap-3 mt-5">
+            <button onclick="prevFlashcard()" class="px-4 py-3 rounded-xl bg-white border border-stone-200 hover:bg-stone-50 text-navy font-bold text-sm shadow-xs active:scale-95 transition">← ก่อนหน้า</button>
+            <button onclick="markFlashcardKnown()" class="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md active:scale-95 transition">✓ จำได้แล้ว!</button>
+            <button onclick="nextFlashcard()" class="px-4 py-3 rounded-xl bg-navy hover:bg-navyDark text-white font-bold text-sm shadow-xs active:scale-95 transition">ถัดไป →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODE B: SMART QUIZ -->
+      <div id="practice-quiz" class="hidden max-w-2xl mx-auto">
+        <div id="quiz-card" class="bg-white rounded-3xl shadow-soft border border-stone-200 p-5 sm:p-7 space-y-5"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- TAB 5: ALL-IN-ONE MASTER CHEAT SHEET                                  -->
+    <!-- ===================================================================== -->
+    <section id="tab-5" class="tab-panel hidden space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-200 no-print">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full bg-navy text-white text-xs font-fr font-semibold mb-2">ALL-IN-ONE MASTER CHEAT SHEET</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-navy">ชีทสรุปครบทุกดีเทลจากทั้ง 3 เอกสาร</h2>
+          <p class="text-sm text-stone-600 mt-1">หน้าเดียวจบ เหมาะสำหรับอ่านทบทวนก่อนสอบหรือกดพิมพ์ลงกระดาษ</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <input id="cheat-filter-input" type="text" placeholder="กรองคำในชีท..." oninput="filterCheatSheet(this.value)"
+            class="px-3.5 py-2 rounded-xl bg-white border border-stone-200 text-xs outline-none focus:border-navy w-44" />
+          <button onclick="window.print()" class="px-4 py-2 rounded-xl bg-coral hover:bg-red-600 text-white text-xs font-bold shadow-xs">🖨️ พิมพ์ชีทสรุป</button>
+        </div>
+      </div>
+
+      <!-- Print Title (visible on print) -->
+      <div class="hidden print:block mb-4 border-b-2 border-navy pb-2">
+        <h1 class="text-xl font-bold text-navy">Mon Cahier de Français — ชีทสรุปครบทุกดีเทล (Oct–Nov Lessons + 4 -ER Verbs)</h1>
+      </div>
+
+      <div id="cheat-sheet-content" class="space-y-4"></div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================================= -->
+  <!-- JAVASCRIPT APPLICATION LOGIC                                            -->
+  <!-- ======================================================================= -->
+  <script>
+    /* =====================================================================
+       1. SPEECH SYNTHESIS (FRENCH TTS WITH SPEED CONTROL)
+       ===================================================================== */
+    let speechSlowMode = false;
+    let cachedFrVoice = null;
+
+    function loadFrenchVoice() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      cachedFrVoice =
+        voices.find(v => v.lang === 'fr-FR' && /google|thomas|amelie|audrey|aurelie/i.test(v.name)) ||
+        voices.find(v => v.lang === 'fr-FR') ||
+        voices.find(v => v.lang && v.lang.toLowerCase().startsWith('fr')) ||
+        null;
+    }
+
+    if ('speechSynthesis' in window) {
+      loadFrenchVoice();
+      window.speechSynthesis.onvoiceschanged = loadFrenchVoice;
+    }
+
+    function speakFrench(text) {
+      try {
+        if (!('speechSynthesis' in window)) {
+          showToast('เบราว์เซอร์นี้ไม่รองรับเสียงอ่านอัตโนมัติ', 'warn');
+          return;
+        }
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = 'fr-FR';
+        if (cachedFrVoice) utter.voice = cachedFrVoice;
+        utter.rate = speechSlowMode ? 0.68 : 0.92;
+        utter.pitch = 1.0;
+        window.speechSynthesis.speak(utter);
+      } catch (e) {
+        showToast('ไม่สามารถเล่นเสียงได้ในขณะนี้', 'warn');
+      }
+    }
+
+    function toggleSpeechSpeed() {
+      speechSlowMode = !speechSlowMode;
+      document.querySelectorAll('.speed-toggle-btn').forEach(btn => {
+        btn.textContent = speechSlowMode ? '🐢 ช้า (0.68x)' : '🔊 ปกติ (0.92x)';
+      });
+      showToast(speechSlowMode ? 'เปลี่ยนเป็นโหมดอ่านช้า (เหมาะสำหรับฝึกออกเสียง)' : 'เปลี่ยนเป็นความเร็วปกติแล้ว');
+    }
+
+    /* =====================================================================
+       2. TOAST HELPER (NEVER USE alert/confirm)
+       ===================================================================== */
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bg = type === 'warn' ? 'bg-amber-600' : type === 'success' ? 'bg-emerald-700' : 'bg-navy';
+      toast.className = `${bg} text-white text-xs sm:text-sm font-medium px-4 py-2.5 rounded-xl shadow-lg pointer-events-auto transition-all duration-300 opacity-0 translate-y-2`;
+      toast.textContent = msg;
+      container.appendChild(toast);
+      requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0', 'translate-y-2');
+      });
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 2400);
+    }
+
+    /* =====================================================================
+       3. COMPLETE CURRICULUM DATA (100% OF ALL 3 PDF FILES)
+       ===================================================================== */
+    const NAV_ITEMS = [
+      { id: 0, icon: '🏠', title: 'หน้าแรก & แผนการเรียน', sub: 'ภาพรวม 3 เอกสาร' },
+      { id: 1, icon: '🇫🇷', title: 'บท 14–15 & 21–22 ต.ค.', sub: 'ปฏิเสธ, 11–30, AVOIR, FAIRE' },
+      { id: 2, icon: '⚡', title: 'กริยาลงท้าย -ER', sub: '4 กริยาหลัก, S\'appeler + 6 คำ' },
+      { id: 3, icon: '🧭', title: 'บท 28–29 ต.ค. & 4–5 พ.ย.', sub: 'Bureau 42, 30–69, ลำดับ, แมว' },
+      { id: 4, icon: '🎯', title: 'ฝึกจำ & แบบทดสอบ', sub: 'Flashcards 3D & Quiz' },
+      { id: 5, icon: '📄', title: 'ชีทสรุปครบทุกดีเทล', sub: 'หน้าเดียวครบ • พิมพ์ได้' },
+    ];
+
+    const STUDY_TOPICS = [
+      { id: 't1_negation', tab: 1, sec: 'sec-1-1', label: '1.1 ปฏิเสธ N\'...PAS & Forum' },
+      { id: 't1_numbers11_30', tab: 1, sec: 'sec-1-2', label: '1.2 ตัวเลข 11–30 & vingtTans' },
+      { id: 't1_6questions', tab: 1, sec: 'sec-1-3', label: '1.3 6 คำถามสัมภาษณ์ & Mbappé' },
+      { id: 't1_avoir', tab: 1, sec: 'sec-1-4', label: '1.4 กริยา AVOIR & 8 ประโยค' },
+      { id: 't1_faire', tab: 1, sec: 'sec-1-5', label: '1.5 กริยา FAIRE & course/courses' },
+      { id: 't2_er_rule', tab: 2, sec: 'sec-2-1', label: '2.1 กฎผัน -ER & ลดรูป/เชื่อม z' },
+      { id: 't2_4verbs', tab: 2, sec: 'sec-2-2', label: '2.2 4 กริยา -ER สำคัญ' },
+      { id: 't2_sappeler', tab: 2, sec: 'sec-2-3', label: '2.3 กริยา S\'appeler' },
+      { id: 't2_extra6', tab: 2, sec: 'sec-2-4', label: '2.4 กริยา -ER เพิ่มเติม 6 คำ' },
+      { id: 't3_directions', tab: 3, sec: 'sec-3-1', label: '3.1 บอกทาง Bureau 42' },
+      { id: 't3_4verbs', tab: 3, sec: 'sec-3-2', label: '3.2 4 กริยาบอกทาง' },
+      { id: 't3_numbers30_69', tab: 3, sec: 'sec-3-3', label: '3.3 ตัวเลข 30–69' },
+      { id: 't3_ordinals', tab: 3, sec: 'sec-3-4', label: '3.4 เลขลำดับที่ 1er–69e' },
+      { id: 't3_prepositions', tab: 3, sec: 'sec-3-5', label: '3.5 บุพบท & Où est le chat ?' },
+    ];
+
+    const NUMBERS_FR = {
+      1:'un', 2:'deux', 3:'trois', 4:'quatre', 5:'cinq', 6:'six', 7:'sept', 8:'huit', 9:'neuf', 10:'dix',
+      11:'onze', 12:'douze', 13:'treize', 14:'quatorze', 15:'quinze', 16:'seize', 17:'dix-sept', 18:'dix-huit', 19:'dix-neuf', 20:'vingt',
+      21:'vingt et un', 22:'vingt-deux', 23:'vingt-trois', 24:'vingt-quatre', 25:'vingt-cinq', 26:'vingt-six', 27:'vingt-sept', 28:'vingt-huit', 29:'vingt-neuf',
+      30:'trente', 31:'trente et un', 32:'trente-deux', 33:'trente-trois', 34:'trente-quatre', 35:'trente-cinq', 36:'trente-six', 37:'trente-sept', 38:'trente-huit', 39:'trente-neuf',
+      40:'quarante', 41:'quarante et un', 42:'quarante-deux', 43:'quarante-trois', 44:'quarante-quatre', 45:'quarante-cinq', 46:'quarante-six', 47:'quarante-sept', 48:'quarante-huit', 49:'quarante-neuf',
+      50:'cinquante', 51:'cinquante et un', 52:'cinquante-deux', 53:'cinquante-trois', 54:'cinquante-quatre', 55:'cinquante-cinq', 56:'cinquante-six', 57:'cinquante-sept', 58:'cinquante-huit', 59:'cinquante-neuf',
+      60:'soixante', 61:'soixante et un', 62:'soixante-deux', 63:'soixante-trois', 64:'soixante-quatre', 65:'soixante-cinq', 66:'soixante-six', 67:'soixante-sept', 68:'soixante-huit', 69:'soixante-neuf'
+    };
+
+    const SIX_QUESTIONS = [
+      { n: 1, q: "Comment tu t'appelles ?", a: "Je m'appelle .... + nationalité (Je suis ....)", th: "เธอชื่ออะไร? → ฉันชื่อ... + สัญชาติ (ฉันเป็นคน...)", speak: "Comment tu t'appelles ? Je m'appelle" },
+      { n: 2, q: "Quel âge tu as ?", a: 'J\'ai vingt ans ("I have" 20 years)', th: "เธออายุเท่าไหร่? → ฉันอายุ 20 ปี (ฝรั่งเศสใช้ AVOIR แปลว่ามี ไม่ใช่เป็น!)", speak: "Quel âge tu as ? J'ai vingt ans" },
+      { n: 3, q: "Tu habites où ?", a: "J'habite à ..... (city) EN / AU (country).", th: "เธออาศัยอยู่ที่ไหน? → ฉันอยู่ที่เมือง... (à) ในประเทศ... (EN หญิง / AU ชาย)", speak: "Tu habites où ? J'habite à Paris en France" },
+      { n: 4, q: "Qu'est-ce que tu fais ?", a: "Je suis .... (job, occupation)", th: "เธอทำงาน/เรียนอะไร? → ฉันเป็น... (อาชีพ)", speak: "Qu'est-ce que tu fais ? Je suis étudiant" },
+      { n: 5, q: "Qu'est-ce que tu aimes ?", a: "J'aime le / la / les .... (3 examples)", th: "เธอชอบอะไร? → ฉันชอบ... (ยกตัวอย่าง 3 อย่าง)", speak: "Qu'est-ce que tu aimes ? J'aime la musique" },
+      { n: 6, q: "Quelles langues tu parles ?", a: "Je parle .... (3 examples)", th: "เธอพูดภาษาอะไรบ้าง? → ฉันพูด... (ยกตัวอย่าง 3 ภาษา)", speak: "Quelles langues tu parles ? Je parle français" },
+    ];
+
+    const AVOIR_SENTENCES = [
+      { emoji: '🧑‍🎓', fr: "J'ai vingt-deux camarades de classe", num: '22', th: 'ฉันมีเพื่อนร่วมชั้น 22 คน' },
+      { emoji: '🎒', fr: 'Nous avons dix-sept sacs', num: '17', th: 'พวกเรามีกระเป๋า 17 ใบ' },
+      { emoji: '👟', fr: "J'ai quinze paires de chaussures", num: '15', th: 'ฉันมีรองเท้า 15 คู่' },
+      { emoji: '🐒', fr: "J'ai ONZE singes", num: '11', th: 'ฉันมีลิง 11 ตัว' },
+      { emoji: '🖐️', fr: "J'ai cinq doigts", num: '5', th: 'ฉันมีนิ้วมือ 5 นิ้ว' },
+      { emoji: '🐱', fr: "J'ai neuf chats", num: '9', th: 'ฉันมีแมว 9 ตัว' },
+      { emoji: '👔', fr: 'Tu as vingt-sept chemises dans la chambre', num: '27', th: 'เธอมีเสื้อเชิ้ต 27 ตัวในห้องนอน' },
+      { emoji: '👗', fr: "J'ai sept robes à la maison", num: '7', th: 'ฉันมีชุดเดรส 7 ชุดที่บ้าน' },
+    ];
+
+    const FOUR_ER_VERBS = [
+      {
+        inf: 'PARLER', en: 'to speak', th: 'พูด', elide: false, liaison: false,
+        rows: [
+          ['Je', 'parl', 'e', 'Je parle'],
+          ['Tu', 'parl', 'es', 'Tu parles'],
+          ['Il/elle/on', 'parl', 'e', 'Il parle'],
+          ['Nous', 'parl', 'ons', 'Nous parlons'],
+          ['Vous', 'parl', 'ez', 'Vous parlez'],
+          ['Ils/elles', 'parl', 'ent', 'Ils parlent'],
+        ]
+      },
+      {
+        inf: 'AIMER', en: 'to like / to love', th: 'ชอบ / รัก', elide: true, liaison: true,
+        rows: [
+          ["J'", 'aim', 'e', "J'aime"],
+          ['Tu', 'aim', 'es', 'Tu aimes'],
+          ['Il/elle/on', 'aim', 'e', 'Il aime'],
+          ['Nous', 'aim', 'ons', 'Nous aimons', 'z'],
+          ['Vous', 'aim', 'ez', 'Vous aimez', 'Z'],
+          ['Ils/elles', 'aim', 'ent', 'Ils aiment', 'z'],
+        ]
+      },
+      {
+        inf: 'HABITER', en: 'to live', th: 'อาศัยอยู่', elide: true, liaison: true,
+        rows: [
+          ["J'", 'habit', 'e', "J'habite"],
+          ['Tu', 'habit', 'es', 'Tu habites'],
+          ['Il/elle/on', 'habit', 'e', 'Il habite'],
+          ['Nous', 'habit', 'ons', 'Nous habitons', 'z'],
+          ['Vous', 'habit', 'ez', 'Vous habitez', 'z'],
+          ['Ils/elles', 'habit', 'ent', 'Ils habitent', 'z'],
+        ]
+      },
+      {
+        inf: 'ÉCOUTER', en: 'to listen', th: 'ฟัง', elide: true, liaison: true,
+        rows: [
+          ["J'", 'écout', 'e', "J'écoute"],
+          ['Tu', 'écout', 'es', 'Tu écoutes'],
+          ['Il/elle/on', 'écout', 'e', 'Il écoute'],
+          ['Nous', 'écout', 'ons', 'Nous écoutons', 'z'],
+          ['Vous', 'écout', 'ez', 'Vous écoutez', 'z'],
+          ['Ils/elles', 'écout', 'ent', 'Ils écoutent', 'z'],
+        ]
+      }
+    ];
+
+    const EXTRA_ER_VERBS = [
+      {
+        inf: 'Travailler', en: 'to work', th: 'ทำงาน', note: 'ผันตามสูตร -ER ปกติเลย ไม่มีข้อยกเว้น',
+        forms: ['Je travaille', 'Tu travailles', 'Il/elle/on travaille', 'Nous travaillons', 'Vous travaillez', 'Ils/elles travaillent']
+      },
+      {
+        inf: 'Étudier', en: 'to study', th: 'เรียน / ศึกษา', note: 'ขึ้นต้นด้วยสระ É → ลดรูปเป็น J\'étudie และเชื่อมเสียง z กับ Nous/Vous/Ils/elles',
+        forms: ["J'étudie", 'Tu étudies', 'Il/elle/on étudie', 'Nous (z) étudions', 'Vous (z) étudiez', 'Ils/elles (z) étudient']
+      },
+      {
+        inf: 'Manger', en: 'to eat', th: 'กิน', note: '💡 ทริคพิเศษ: กับ Nous ต้องคงตัว e ไว้เป็น Nous mangEons เพื่อคงเสียงนุ่ม "ม็อง-ฌง"',
+        forms: ['Je mange', 'Tu manges', 'Il/elle/on mange', 'Nous mangeons', 'Vous mangez', 'Ils/elles mangent']
+      },
+      {
+        inf: 'Regarder', en: 'to watch / to look at', th: 'ดู / มอง', note: 'ผันตามสูตร -ER ปกติเลย เช่น Je regarde la télé',
+        forms: ['Je regarde', 'Tu regardes', 'Il/elle/on regarde', 'Nous regardons', 'Vous regardez', 'Ils/elles regardent']
+      },
+      {
+        inf: 'Acheter', en: 'to buy', th: 'ซื้อ', note: '💡 ทริคพิเศษ: ขึ้นต้นด้วยสระ (J\'achète) และเติมไม้เอก (è) ใน Je/Tu/Il/Ils ส่วน Nous/Vous ไม่ต้องเติม',
+        forms: ["J'achète", 'Tu achètes', 'Il/elle/on achète', 'Nous (z) achetons', 'Vous (z) achetez', 'Ils/elles (z) achètent']
+      },
+      {
+        inf: 'Donner', en: 'to give', th: 'ให้', note: 'ผันตามสูตร -ER ปกติเลย เช่น Je donne un cadeau',
+        forms: ['Je donne', 'Tu donnes', 'Il/elle/on donne', 'Nous donnons', 'Vous donnez', 'Ils/elles donnent']
+      }
+    ];
+
+    const DIRECTION_PHRASES = [
+      { fr: 'Je CHERCHE le bureau 42', en: 'I am looking for the office 42', th: 'ฉันกำลังหาห้องทำงาน 42', speak: 'Je cherche le bureau quarante-deux' },
+      { fr: 'Tu CONNAIS ....?', en: 'do you know...?', th: 'เธอรู้จัก...ไหม?', speak: 'Tu connais ?' },
+      { fr: 'QUI est au bureau 42 ?', en: 'WHO is in the office 42?', th: 'ใครอยู่ในห้อง 42?', speak: 'Qui est au bureau quarante-deux ?' },
+      { fr: "C'est TOUT DROIT", en: 'it is straight forward', th: 'ตรงไปเลย', speak: "C'est tout droit" },
+      { fr: 'TOURNEZ À GAUCHE', en: 'turn left', th: 'เลี้ยวซ้าย', speak: 'Tournez à gauche' },
+      { fr: 'TOURNEZ À DROITE', en: 'turn right', th: 'เลี้ยวขวา', speak: 'Tournez à droite' },
+      { fr: 'AU BOUT DU...(masc) // de la..(fem)', en: 'at the end of the.....', th: 'สุดทางของ... (ใช้ DU ชาย / DE LA หญิง)', speak: 'Au bout du couloir. Au bout de la rue.' },
+      { fr: "Il n'est pas loin", en: 'it is NOT far', th: 'มันอยู่ไม่ไกล', speak: "Il n'est pas loin" },
+      { fr: "Il est LÀ << / >> c'est ICI", en: 'it is there << / >> it is here', th: 'มันอยู่ตรงนั้น (LÀ) << / >> มันอยู่ตรงนี้ (ICI)', speak: "Il est là. C'est ici." },
+    ];
+
+    const DIRECTION_4VERBS = [
+      {
+        inf: 'ALLER', en: 'to go', th: 'ไป (ผันไม่ปกติ จำให้แม่น!)',
+        rows: [
+          ['Je vais', 'ฉันไป'],
+          ['Tu vas', 'เธอไป'],
+          ['Il / elle / on va', 'เขา/เธอ/พวกเราไป'],
+          ['Nous <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">Z</span> allons', 'พวกเราไป', 'Nous allons'],
+          ['Vous <span class="px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">Z</span> allez', 'คุณ/พวกคุณไป', 'Vous allez'],
+          ['Ils / elles vont', 'พวกเขาไป']
+        ]
+      },
+      {
+        inf: 'CONNAÎTRE', en: 'to know', th: 'รู้จัก',
+        rows: [
+          ['Je connais', 'ฉันรู้จัก'],
+          ['Tu connais', 'เธอรู้จัก'],
+          ['Il / elle / on connaît', 'เขา/เธอรู้จัก'],
+          ['Nous connaissons', 'พวกเรารู้จัก'],
+          ['Vous connaissez', 'คุณรู้จัก'],
+          ['Ils / elles connaissent', 'พวกเขารู้จัก']
+        ]
+      },
+      {
+        inf: 'TOURNER', en: 'to turn', th: 'เลี้ยว (กริยา -ER ปกติ)',
+        rows: [
+          ['Je tourne', 'ฉันเลี้ยว'],
+          ['Tu tournes', 'เธอเลี้ยว'],
+          ['Il / elle / on tourne', 'เขา/เธอเลี้ยว'],
+          ['Nous tournons', 'พวกเราเลี้ยว'],
+          ['Vous tournez', 'คุณเลี้ยว'],
+          ['Ils / elles tournent', 'พวกเขาเลี้ยว']
+        ]
+      },
+      {
+        inf: 'CHERCHER', en: 'to look for (search)', th: 'ค้นหา / มองหา (กริยา -ER ปกติ)',
+        rows: [
+          ['Je cherche', 'ฉันหา'],
+          ['Tu cherches', 'เธอหา'],
+          ['Il / elle / on cherche', 'เขา/เธอหา'],
+          ['Nous cherchons', 'พวกเราหา'],
+          ['Vous cherchez', 'คุณหา'],
+          ['Ils / elles cherchent', 'พวกเขาหา']
+        ]
+      }
+    ];
+
+    const PDF_ORDINAL_NOTES = [
+      { n: 1, tag: '1er', fr: 'masc: le premier // fem: la première', note: 'ลำดับที่ 1 เท่านั้นที่แยกเพศชาย/หญิง', speak: 'le premier, la première' },
+      { n: 2, tag: '2e', fr: 'le / la DEUXième', note: 'sounds "la DEUZième" (x ออกเสียง Z)', speak: 'le deuxième, la deuxième' },
+      { n: 3, tag: '3e', fr: 'le / la troisième', note: 'ออกเสียง "troiZième" (s ออกเสียง Z)', speak: 'le troisième, la troisième' },
+      { n: 4, tag: '4e', fr: 'la quatrième', note: 'ตัด e ท้าย quatre แล้วเติม -ième', speak: 'la quatrième' },
+      { n: 5, tag: '5e', fr: 'la cinquième', note: 'เติม u หลัง q → cinquième', speak: 'la cinquième' },
+      { n: 6, tag: '6e', fr: 'la six(Z)ième', note: 'x ออกเสียงเชื่อม Z', speak: 'la sixième' },
+      { n: 9, tag: '9e', fr: 'la neuvième', note: 'โน้ตอาจารย์: la neufVième (เปลี่ยนเสียง f → V)', speak: 'la neuvième' },
+      { n: 10, tag: '10e', fr: 'la dix(Z)ième', note: 'x ออกเสียงเชื่อม Z', speak: 'la dixième' },
+      { n: 20, tag: '20e', fr: 'la vingTième', note: 'ออกเสียงตัว T ชัดเจน', speak: 'la vingtième' },
+      { n: 21, tag: '21e', fr: 'la vingT-et unième', note: 'ออกเสียง T + et unième', speak: 'la vingt-et-unième' },
+      { n: 22, tag: '22e', fr: 'la vingTdeux(Z)ième', note: 'ออกเสียง T และ Z', speak: 'la vingt-deuxième' },
+      { n: 30, tag: '30e', fr: 'la trentième', note: 'ตัด e ท้าย trente → trentième', speak: 'la trentième' },
+      { n: 39, tag: '39e', fr: 'la trente-neuvième', note: 'โน้ตอาจารย์: la trenteneuf (V)ième', speak: 'la trente-neuvième' },
+      { n: 69, tag: '69e', fr: 'la 69ème Avenue', note: 'โน้ตอาจารย์: la soixSSante neuf Vième avenue', speak: 'la soixante-neuvième avenue' },
+    ];
+
+    const CAT_POSITIONS = [
+      { id: 'dans', label: 'DANS LE (ใน)', fr: 'LE CHAT EST DANS LE LIT', html: 'LE CHAT <span class="text-coral underline">EST</span> <span class="text-mascText">DANS LE</span> LIT', th: 'แมวอยู่ในเตียง (= in / อย่าลืม EST == is!)', badge: 'DANS LE (in)', x: 252, y: 162, behind: false, speak: 'Le chat est dans le lit' },
+      { id: 'sur', label: 'SUR LE (บน)', fr: 'Le chat est SUR le lit', html: 'Le chat <span class="text-coral underline">EST</span> <span class="text-mascText">SUR</span> le lit', th: 'แมวอยู่บนเตียง (= on)', badge: 'SUR LE/LA (on)', x: 252, y: 138, behind: false, speak: 'Le chat est sur le lit' },
+      { id: 'sous', label: 'SOUS LE (ใต้)', fr: 'Le chat est SOUS le lit', html: 'Le chat <span class="text-coral underline">EST</span> <span class="text-mascText">SOUS</span> le lit', th: 'แมวอยู่ใต้เตียง (= under)', badge: 'SOUS LE/LA (under)', x: 252, y: 218, behind: false, speak: 'Le chat est sous le lit' },
+      { id: 'devant', label: 'DEVANT LE (หน้า)', fr: 'Le chat est DEVANT le lit', html: 'Le chat <span class="text-coral underline">EST</span> <span class="text-mascText">DEVANT</span> le lit', th: 'แมวอยู่ข้างหน้าเตียง (= in front of)', badge: 'DEVANT LE (in front of)', x: 252, y: 242, behind: false, speak: 'Le chat est devant le lit' },
+      { id: 'derriere', label: 'DERRIÈRE LE (หลัง)', fr: 'Le chat est DERRIÈRE le lit', html: 'Le chat <span class="text-coral underline">EST</span> <span class="text-mascText">DERRIÈRE</span> le lit', th: 'แมวอยู่ข้างหลังเตียง (= behind)', badge: 'DERRIÈRE LE (behind)', x: 252, y: 105, behind: true, speak: 'Le chat est derrière le lit' },
+      { id: 'gauche', label: 'À GAUCHE DU (ซ้าย)', fr: 'Le chat est à gauche DU lit', html: 'Le chat <span class="text-coral underline">EST</span> à gauche <span class="text-mascText">DU</span> lit', th: 'แมวอยู่ทางซ้ายของเตียง (เพศชายใช้ DU)', badge: 'À GAUCHE DU / DE LA', x: 135, y: 205, behind: false, speak: 'Le chat est à gauche du lit' },
+      { id: 'droite', label: 'À DROITE DE LA (ขวา)', fr: 'Le chat est à droite DE LA lampe', html: 'Le chat <span class="text-coral underline">EST</span> à droite <span class="text-femText">DE LA</span> lampe', th: 'แมวอยู่ทางขวาของโคมไฟ (la lampe เพศหญิงใช้ DE LA!)', badge: 'À DROITE DU / DE LA', x: 472, y: 172, behind: false, speak: 'Le chat est à droite de la lampe' },
+      { id: 'cote', label: 'À CÔTÉ DU (ข้างๆ)', fr: 'Le chat est à côté DU chien', html: 'Le chat <span class="text-coral underline">EST</span> à côté <span class="text-mascText">DU</span> chien', th: 'แมวอยู่ข้างๆ หมา (le chien เพศชายใช้ DU!)', badge: 'À CÔTÉ DU / DE LA', x: 562, y: 210, behind: false, speak: 'Le chat est à côté du chien' },
+      { id: 'entre', label: 'ENTRE ... ET ... (ระหว่าง)', fr: 'Le chat est ENTRE le lit ET la lampe', html: 'Le chat <span class="text-coral underline">EST</span> <span class="text-coral">ENTRE</span> le lit <span class="text-coral">ET</span> la lampe', th: 'แมวอยู่ระหว่างเตียงกับโคมไฟ (= between 1 and 2 • ฝึกเพิ่มสัปดาห์หน้า)', badge: 'ENTRE 1 ET 2', x: 375, y: 185, behind: false, speak: 'Le chat est entre le lit et la lampe' },
+      { id: 'bout', label: 'AU BOUT DU (สุดทาง)', fr: 'Le chat est au bout du couloir', html: 'Le chat <span class="text-coral underline">EST</span> <span class="text-mascText">au bout du</span> couloir', th: 'แมวอยู่สุดทางเดิน (= at the end of the... • DU ชาย / DE LA หญิง)', badge: 'AU BOUT DU / DE LA', x: 606, y: 162, behind: false, speak: 'Le chat est au bout du couloir' },
+    ];
+
+    /* =====================================================================
+       4. NAVIGATION & PROGRESS (LOCALSTORAGE)
+       ===================================================================== */
+    let currentTab = 0;
+    const STORAGE_KEY = 'frenchStudyProgress_v1';
+    let masteredTopics = {};
+
+    try {
+      masteredTopics = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    } catch (e) {
+      masteredTopics = {};
+    }
+
+    function saveProgress() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(masteredTopics));
+      } catch (e) {}
+      renderProgressUI();
+    }
+
+    function toggleTopicMastery(topicId) {
+      masteredTopics[topicId] = !masteredTopics[topicId];
+      saveProgress();
+      showToast(masteredTopics[topicId] ? 'เยี่ยมมาก! บันทึกว่า "เข้าใจแล้ว" ✓' : 'ยกเลิกเครื่องหมายเข้าใจแล้ว', masteredTopics[topicId] ? 'success' : 'info');
+    }
+
+    function resetProgress() {
+      masteredTopics = {};
+      saveProgress();
+      showToast('รีเซ็ตความคืบหน้าเรียบร้อยแล้ว');
+    }
+
+    function renderProgressUI() {
+      const total = STUDY_TOPICS.length;
+      const done = STUDY_TOPICS.filter(t => masteredTopics[t.id]).length;
+      const pct = Math.round((done / total) * 100);
+
+      document.querySelectorAll('.progress-percent-text').forEach(el => el.textContent = `${pct}%`);
+      document.querySelectorAll('.progress-bar-fill').forEach(el => el.style.width = `${pct}%`);
+      document.querySelectorAll('.progress-count-text').forEach(el => el.textContent = `${done} / ${total} หัวข้อที่เข้าใจแล้ว`);
+
+      // Update every mastery button inside sections
+      document.querySelectorAll('.mastery-slot').forEach(slot => {
+        const id = slot.dataset.topic;
+        const isDone = !!masteredTopics[id];
+        slot.innerHTML = `
+          <button onclick="toggleTopicMastery('${id}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition active:scale-95 ${
+            isDone
+              ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+              : 'bg-paper text-stone-600 border-stone-300 hover:border-emerald-500 hover:text-emerald-700'
+          }">
+            ${isDone ? '✓ เข้าใจแล้ว' : '○ มาร์คว่าเข้าใจแล้ว'}
+          </button>`;
+      });
+
+      // Update Tab 0 checklist
+      const list = document.getElementById('overview-checklist');
+      if (list) {
+        list.innerHTML = STUDY_TOPICS.map(t => {
+          const isDone = !!masteredTopics[t.id];
+          return `
+            <div class="flex items-center justify-between gap-2 p-2.5 rounded-xl border ${isDone ? 'bg-emerald-50/70 border-emerald-200' : 'bg-paper border-stone-200'}">
+              <button onclick="jumpToSection(${t.tab}, '${t.sec}')" class="text-left text-xs font-medium ${isDone ? 'text-emerald-900' : 'text-navy'} hover:underline truncate">${t.label}</button>
+              <button onclick="toggleTopicMastery('${t.id}')" class="shrink-0 w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold ${isDone ? 'bg-emerald-600 text-white' : 'bg-white border border-stone-300 text-stone-400'}">
+                ${isDone ? '✓' : ''}
+              </button>
+            </div>`;
+        }).join('');
+      }
+    }
+
+    function renderNavs() {
+      const html = NAV_ITEMS.map(item => {
+        const active = item.id === currentTab;
+        return `
+          <button onclick="switchTab(${item.id}); toggleMobileDrawer(false);"
+            class="w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-3 transition ${
+              active
+                ? 'bg-navy text-white shadow-sm'
+                : 'text-stone-700 hover:bg-paper hover:text-navy'
+            }">
+            <span class="text-lg shrink-0">${item.icon}</span>
+            <div class="min-w-0">
+              <div class="text-xs sm:text-sm font-bold truncate">${item.title}</div>
+              <div class="text-[11px] truncate ${active ? 'text-blue-200' : 'text-stone-400'}">${item.sub}</div>
+            </div>
+          </button>`;
+      }).join('');
+      document.getElementById('desktop-nav-links').innerHTML = html;
+      document.getElementById('mobile-nav-links').innerHTML = html;
+    }
+
+    function switchTab(id) {
+      currentTab = id;
+      for (let i = 0; i <= 5; i++) {
+        const el = document.getElementById(`tab-${i}`);
+        if (el) el.classList.toggle('hidden', i !== id);
+      }
+      renderNavs();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function jumpToSection(tabId, secId) {
+      closeSearchModal();
+      switchTab(tabId);
+      setTimeout(() => {
+        const target = document.getElementById(secId);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 80);
+    }
+
+    function toggleMobileDrawer(open) {
+      const drawer = document.getElementById('mobile-drawer');
+      drawer.classList.toggle('hidden', !open);
+    }
+
+    /* =====================================================================
+       5. RENDER CONTENT FOR TABS 1, 2, 3
+       ===================================================================== */
+    function renderTab1() {
+      // Numbers 11-30
+      const g11 = document.getElementById('grid-numbers-11-30');
+      let h11 = '';
+      for (let n = 11; n <= 30; n++) {
+        const word = NUMBERS_FR[n];
+        const special = n === 20 || n === 21 || n === 22 || n === 30;
+        h11 += `
+          <button onclick="speakFrench('${word}')" class="p-3 rounded-xl border text-left transition active:scale-95 hover:border-navy ${
+            special ? 'bg-liaisonBg/60 border-amber-300' : 'bg-paper border-stone-200 hover:bg-white'
+          }">
+            <div class="flex items-center justify-between">
+              <span class="font-fr font-extrabold text-navy text-base">${n}</span>
+              <span class="text-xs opacity-70">🔊</span>
+            </div>
+            <div class="font-fr font-semibold text-xs sm:text-sm text-stone-700 mt-0.5">${word}</div>
+          </button>`;
+      }
+      g11.innerHTML = h11;
+
+      // 6 Questions
+      document.getElementById('six-questions-grid').innerHTML = SIX_QUESTIONS.map(item => `
+        <div class="p-4 rounded-2xl bg-paper border border-stone-200 flex items-start justify-between gap-3">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-navy text-white font-fr font-bold text-xs flex items-center justify-center shrink-0">${item.n}</span>
+              <span class="font-fr font-bold text-navy text-sm sm:text-base">${item.q}</span>
+            </div>
+            <div class="font-fr text-xs sm:text-sm font-semibold text-coral pl-8">>> ${item.a}</div>
+            <div class="text-xs text-stone-600 pl-8">${item.th}</div>
+          </div>
+          <button onclick="speakFrench('${item.speak.replace(/'/g, "\\'")}')" class="p-2.5 rounded-xl bg-white border border-stone-200 hover:bg-navy hover:text-white shrink-0 transition">🔊</button>
+        </div>
+      `).join('');
+
+      // AVOIR 8 Sentences
+      document.getElementById('avoir-sentences-grid').innerHTML = AVOIR_SENTENCES.map((s, idx) => `
+        <div class="p-3.5 rounded-xl bg-paper border border-stone-200 flex items-center justify-between gap-3">
+          <div class="flex items-start gap-2.5">
+            <span class="text-xl shrink-0">${s.emoji}</span>
+            <div>
+              <div class="font-fr font-bold text-navy text-xs sm:text-sm">${idx + 1}. ${s.fr}</div>
+              <div class="text-xs text-stone-600 mt-0.5">${s.th} <span class="px-1.5 py-0.5 rounded bg-white border border-stone-200 font-fr font-bold text-coral ml-1">${s.num}</span></div>
+            </div>
+          </div>
+          <button onclick="speakFrench('${s.fr.replace(/'/g, "\\'")}')" class="p-2 rounded-xl bg-white border border-stone-200 hover:bg-navy hover:text-white shrink-0 transition">🔊</button>
+        </div>
+      `).join('');
+
+      // Pre-fill Mbappé demo so user sees immediate rich example
+      fillMbappeDemo(false);
+    }
+
+    function fillMbappeDemo(toast = true) {
+      document.getElementById('iv-name').value = 'Kylian Mbappé';
+      document.getElementById('iv-nat').value = 'français';
+      document.getElementById('iv-age').value = 'vingt-sept';
+      document.getElementById('iv-city').value = 'à Paris en France (in class, not in Madrid :-) )';
+      document.getElementById('iv-job').value = 'footballeur';
+      document.getElementById('iv-likes').value = 'le football, les jeux vidéo et le cinéma';
+      document.getElementById('iv-langs').value = 'français, anglais et espagnol';
+      updateInterviewScript();
+      if (toast) showToast('โหลดตัวอย่างบทสัมภาษณ์ Kylian Mbappé แล้ว! ⚽');
+    }
+
+    function clearInterviewBuilder() {
+      ['iv-name','iv-nat','iv-age','iv-city','iv-job','iv-likes','iv-langs'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      updateInterviewScript();
+    }
+
+    function getInterviewLines() {
+      const name = document.getElementById('iv-name').value.trim() || '......';
+      const nat = document.getElementById('iv-nat').value.trim() || '......';
+      const age = document.getElementById('iv-age').value.trim() || 'vingt';
+      const city = document.getElementById('iv-city').value.trim() || 'à ...... en ......';
+      const job = document.getElementById('iv-job').value.trim() || '......';
+      const likes = document.getElementById('iv-likes').value.trim() || 'le ......, la ...... et les ......';
+      const langs = document.getElementById('iv-langs').value.trim() || '......, ...... et ......';
+
+      return [
+        `1. Q: Comment tu t'appelles ?  R: Je m'appelle ${name}. Je suis ${nat}.`,
+        `2. Q: Quel âge tu as ?  R: J'ai ${age} ans.`,
+        `3. Q: Tu habites où ?  R: J'habite ${city}.`,
+        `4. Q: Qu'est-ce que tu fais ?  R: Je suis ${job}.`,
+        `5. Q: Qu'est-ce que tu aimes ?  R: J'aime ${likes}.`,
+        `6. Q: Quelles langues tu parles ?  R: Je parle ${langs}.`,
+      ];
+    }
+
+    function updateInterviewScript() {
+      const lines = getInterviewLines();
+      document.getElementById('interview-script-output').innerHTML = lines.map(l => `<div>${l}</div>`).join('');
+    }
+
+    function speakInterviewScript() {
+      const clean = getInterviewLines()
+        .map(l => l.replace(/^\d+\.\s*Q:\s*/,'').replace(/\s*R:\s*/, ' ').replace(/\(.*?\)/g, '').replace(/\.{3,}/g, ''))
+        .join(' ');
+      speakFrench(clean);
+    }
+
+    function copyInterviewScript() {
+      const text = getInterviewLines().join('\n');
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast('คัดลอกบทสัมภาษณ์ไปที่คลิปบอร์ดแล้ว! 📋', 'success');
+      } catch (e) {
+        showToast('ไม่สามารถคัดลอกอัตโนมัติได้', 'warn');
+      }
+      document.body.removeChild(ta);
+    }
+
+    function renderTab2() {
+      // 4 Important -ER Verbs
+      document.getElementById('four-er-verbs-grid').innerHTML = FOUR_ER_VERBS.map(v => `
+        <div class="rounded-2xl bg-paper border border-stone-200 p-4 space-y-2.5">
+          <div class="flex items-center justify-between border-b border-stone-200 pb-2.5">
+            <div>
+              <span class="font-fr font-extrabold text-navy text-lg">${v.inf}</span>
+              <span class="text-xs text-stone-500 ml-1.5">= ${v.en} (${v.th})</span>
+            </div>
+            <button onclick="speakFrench('${v.inf.toLowerCase()}')" class="px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-xs font-semibold hover:bg-navy hover:text-white transition">🔊</button>
+          </div>
+          <div class="space-y-1.5">
+            ${v.rows.map(r => {
+              const [subj, stem, end, speakStr, zBadge] = r;
+              return `
+                <button onclick="speakFrench('${speakStr.replace(/'/g, "\\'")}')" class="w-full px-3 py-2 rounded-xl bg-white border border-stone-100 hover:border-navy flex items-center justify-between text-sm transition">
+                  <span class="font-fr text-left">
+                    <span class="font-semibold text-stone-600">${subj}</span>
+                    ${zBadge ? `<span class="mx-1 px-1.5 py-0.5 rounded bg-liaisonBg text-liaisonText font-bold text-xs">${zBadge}</span>` : ' '}
+                    <span class="font-bold text-navy">${stem}</span><span class="text-stone-300">-</span><span class="font-extrabold text-coral">${end}</span>
+                  </span>
+                  <span class="text-xs opacity-60">🔊</span>
+                </button>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      // Extra 6 -ER Verbs Selector
+      renderExtraERVerb(0);
+    }
+
+    function renderExtraERVerb(index) {
+      document.getElementById('extra-er-selector').innerHTML = EXTRA_ER_VERBS.map((v, i) => `
+        <button onclick="renderExtraERVerb(${i})" class="p-3 rounded-xl border text-center transition active:scale-95 ${
+          i === index
+            ? 'bg-navy text-white border-navy shadow-sm'
+            : 'bg-white text-navy border-stone-200 hover:border-navy'
+        }">
+          <div class="font-fr font-bold text-sm">${v.inf}</div>
+          <div class="text-[11px] ${i === index ? 'text-blue-200' : 'text-stone-500'}">${v.th}</div>
+        </button>
+      `).join('');
+
+      const v = EXTRA_ER_VERBS[index];
+      document.getElementById('extra-er-display').innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div>
+            <span class="font-fr font-extrabold text-navy text-xl">${v.inf}</span>
+            <span class="text-sm text-stone-600 ml-2">= ${v.en} (${v.th})</span>
+          </div>
+          <button onclick="speakFrench('${v.inf}')" class="px-3 py-1.5 rounded-xl bg-navy text-white text-xs font-bold">🔊 ฟังคำตั้งต้น</button>
+        </div>
+        <div class="text-xs bg-amber-50 border border-amber-200 text-stone-700 rounded-xl px-3.5 py-2 mb-3">${v.note}</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          ${v.forms.map(f => {
+            const cleanSpeak = f.replace(/\(z\)\s*/g, '').replace(/Il\/elle\/on/, 'Il').replace(/Ils\/elles/, 'Ils');
+            return `
+              <button onclick="speakFrench('${cleanSpeak.replace(/'/g, "\\'")}')" class="p-3 rounded-xl bg-white border border-stone-200 hover:border-navy flex items-center justify-between text-sm transition">
+                <span class="font-fr font-bold text-navy">${f.replace('(z)', '<span class="px-1 py-0.5 rounded bg-liaisonBg text-liaisonText text-xs">z</span>')}</span>
+                <span class="text-xs opacity-60">🔊</span>
+              </button>`;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function renderTab3() {
+      // 9 Direction Phrases
+      document.getElementById('direction-phrases-grid').innerHTML = DIRECTION_PHRASES.map(p => `
+        <div class="p-3.5 rounded-xl bg-paper border border-stone-200 flex items-center justify-between gap-3">
+          <div>
+            <div class="font-fr font-bold text-navy text-sm sm:text-base">${p.fr}</div>
+            <div class="text-xs text-stone-500 font-fr">= ${p.en}</div>
+            <div class="text-xs text-coral font-medium mt-0.5">${p.th}</div>
+          </div>
+          <button onclick="speakFrench('${p.speak.replace(/'/g, "\\'")}')" class="p-2.5 rounded-xl bg-white border border-stone-200 hover:bg-navy hover:text-white shrink-0 transition">🔊</button>
+        </div>
+      `).join('');
+
+      // 4 Direction Verbs
+      document.getElementById('direction-4verbs-grid').innerHTML = DIRECTION_4VERBS.map(v => `
+        <div class="rounded-2xl bg-paper border border-stone-200 p-4 space-y-2">
+          <div class="flex items-center justify-between border-b border-stone-200 pb-2">
+            <div>
+              <span class="font-fr font-extrabold text-navy text-lg">${v.inf}</span>
+              <span class="text-xs text-stone-500 ml-1.5">= ${v.en} (${v.th})</span>
+            </div>
+            <button onclick="speakFrench('${v.inf.toLowerCase()}')" class="px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-xs">🔊</button>
+          </div>
+          <div class="space-y-1.5">
+            ${v.rows.map(r => {
+              const speakStr = (r[2] || r[0]).replace(/Il \/ elle \/ on/, 'Il').replace(/Ils \/ elles/, 'Ils');
+              return `
+                <button onclick="speakFrench('${speakStr.replace(/'/g, "\\'")}')" class="w-full px-3 py-2 rounded-xl bg-white border border-stone-100 hover:border-navy flex items-center justify-between text-xs sm:text-sm transition">
+                  <span class="font-fr font-bold text-navy">${r[0]}</span>
+                  <span class="text-stone-500">${r[1]} 🔊</span>
+                </button>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      // Numbers 30-69 Grid
+      const g30 = document.getElementById('grid-numbers-30-69');
+      let h30 = '';
+      for (let n = 30; n <= 69; n++) {
+        const isEtUn = n === 31 || n === 41 || n === 51 || n === 61;
+        const isTen = n % 10 === 0;
+        h30 += `
+          <button onclick="selectNumber30_69(${n})" class="py-2.5 px-1 rounded-xl font-fr font-bold text-xs sm:text-sm border transition active:scale-95 ${
+            isEtUn
+              ? 'bg-coral/15 border-coral/40 text-coral hover:bg-coral hover:text-white'
+              : isTen
+                ? 'bg-navy text-white border-navy hover:bg-navyDark'
+                : 'bg-white border-stone-200 text-navy hover:border-navy hover:bg-blue-50'
+          }">${n}</button>`;
+      }
+      g30.innerHTML = h30;
+
+      // PDF Ordinal Reference Cards
+      document.getElementById('pdf-ordinals-table').innerHTML = PDF_ORDINAL_NOTES.map(o => `
+        <div class="p-3.5 rounded-xl bg-paper border border-stone-200 flex items-start justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-md bg-navy text-white font-fr font-bold text-xs">${o.tag}</span>
+              <span class="font-fr font-bold text-navy text-sm">${o.fr}</span>
+            </div>
+            <div class="text-xs text-liaisonText font-medium mt-1">${o.note}</div>
+          </div>
+          <button onclick="speakFrench('${o.speak.replace(/'/g, "\\'")}')" class="p-2 rounded-lg bg-white border border-stone-200 hover:bg-navy hover:text-white shrink-0">🔊</button>
+        </div>
+      `).join('');
+
+      // Cat Preposition Buttons
+      document.getElementById('cat-buttons-grid').innerHTML = CAT_POSITIONS.map(p => `
+        <button id="cat-btn-${p.id}" onclick="moveCat('${p.id}')" class="cat-pos-btn p-2.5 rounded-xl border border-stone-200 bg-white hover:border-navy text-xs font-bold text-navy transition active:scale-95">
+          ${p.label}
+        </button>
+      `).join('');
+
+      updateOrdinalExplorer(69);
+      moveCat('dans', false);
+    }
+
+    function highlightMapStep(step) {
+      const s = document.getElementById('route-straight');
+      const l = document.getElementById('route-left');
+      const r = document.getElementById('route-right');
+      [s, l, r].forEach(el => el.setAttribute('opacity', '0.18'));
+      const cap = document.getElementById('map-caption');
+
+      if (step === 'straight') {
+        s.setAttribute('opacity', '1');
+        cap.textContent = "⬆️ C'est TOUT DROIT = ตรงไปข้างหน้าเลย";
+        speakFrench("C'est tout droit");
+      } else if (step === 'left') {
+        s.setAttribute('opacity', '0.6');
+        l.setAttribute('opacity', '1');
+        cap.textContent = "⬅️ TOURNEZ À GAUCHE = เลี้ยวซ้าย";
+        speakFrench("Tournez à gauche");
+      } else if (step === 'right') {
+        s.setAttribute('opacity', '0.6');
+        r.setAttribute('opacity', '1');
+        cap.textContent = "➡️ TOURNEZ À DROITE = เลี้ยวขวาไปทาง Bureau 42";
+        speakFrench("Tournez à droite");
+      } else if (step === 'end') {
+        s.setAttribute('opacity', '0.6');
+        r.setAttribute('opacity', '1');
+        cap.textContent = "🏁 AU BOUT DU couloir = สุดทางเดิน (Il n'est pas loin = อยู่ไม่ไกล!)";
+        speakFrench("Au bout du couloir. Il n'est pas loin.");
+      } else {
+        cap.textContent = "📍 C'est ICI (อยู่ตรงนี้) << / >> Il est LÀ (ห้อง 42 อยู่ตรงนั้น!)";
+        speakFrench("C'est ici. Il est là.");
+      }
+    }
+
+    function selectNumber30_69(n) {
+      const w = NUMBERS_FR[n];
+      const isEtUn = n === 31 || n === 41 || n === 51 || n === 61;
+      document.getElementById('num-30-69-text').innerHTML = `${n} = ${isEtUn ? w.replace('et un', '<span class="underline text-white">ET un</span>') : w}`;
+      document.getElementById('num-30-69-speak').onclick = () => speakFrench(w);
+      speakFrench(w);
+    }
+
+    // Ordinal Builder 1..69
+    let currentOrdinalSpeak = 'la soixante-neuvième avenue';
+    function buildOrdinal(n) {
+      n = parseInt(n, 10);
+      if (n === 1) {
+        return {
+          tag: '1er / 1re',
+          text: 'le premier (masc) // la première (fem)',
+          note: 'ลำดับที่ 1 แยกเพศชาย-หญิงชัดเจน!',
+          speak: 'le premier, la première'
+        };
+      }
+      const base = NUMBERS_FR[n];
+      let ord = '';
+      if (base.endsWith('cinq')) ord = base + 'uième';
+      else if (base.endsWith('neuf')) ord = base.slice(0, -1) + 'vième';
+      else if (base.endsWith('e')) ord = base.slice(0, -1) + 'ième';
+      else ord = base + 'ième';
+
+      // Match teacher's exact note if present
+      const exact = PDF_ORDINAL_NOTES.find(o => o.n === n);
+      let note = exact
+        ? `โน้ตอาจารย์: ${exact.note}`
+        : `เพศชายและหญิงใช้รูปเดียวกัน (le / la ${ord})`;
+
+      return {
+        tag: `${n}e`,
+        text: `le / la ${ord}`,
+        note,
+        speak: n === 69 ? 'la soixante-neuvième avenue' : `la ${ord}`
+      };
+    }
+
+    function updateOrdinalExplorer(val) {
+      const o = buildOrdinal(val);
+      document.getElementById('ord-badge').textContent = o.tag;
+      document.getElementById('ord-main-text').textContent = o.text;
+      document.getElementById('ord-note-text').textContent = o.note;
+      currentOrdinalSpeak = o.speak;
+    }
+
+    function setOrdinal(n) {
+      document.getElementById('ordinal-slider').value = n;
+      updateOrdinalExplorer(n);
+      speakCurrentOrdinal();
+    }
+
+    function speakCurrentOrdinal() {
+      speakFrench(currentOrdinalSpeak);
+    }
+
+    // Cat Room Interactive Movement
+    let currentCatSpeak = 'Le chat est dans le lit';
+    function moveCat(posId, shouldSpeak = true) {
+      const p = CAT_POSITIONS.find(c => c.id === posId);
+      if (!p) return;
+
+      const cat = document.getElementById('cat-sprite');
+      const backLayer = document.getElementById('cat-back-layer');
+      const svg = cat.closest('svg');
+
+      // Re-order SVG z-index when cat goes behind bed
+      if (p.behind) {
+        backLayer.appendChild(cat);
+      } else {
+        svg.appendChild(cat);
+      }
+      cat.setAttribute('transform', `translate(${p.x}, ${p.y})`);
+
+      document.getElementById('cat-fr-sentence').innerHTML = p.html;
+      document.getElementById('cat-th-sentence').textContent = p.th;
+      document.getElementById('cat-badge').textContent = p.badge;
+      currentCatSpeak = p.speak;
+
+      document.querySelectorAll('.cat-pos-btn').forEach(btn => {
+        const active = btn.id === `cat-btn-${posId}`;
+        btn.className = `cat-pos-btn p-2.5 rounded-xl border text-xs font-bold transition active:scale-95 ${
+          active ? 'bg-navy text-white border-navy shadow-sm' : 'bg-white border-stone-200 text-navy hover:border-navy'
+        }`;
+      });
+
+      if (shouldSpeak) speakFrench(p.speak);
+    }
+
+    function speakCurrentCatSentence() {
+      speakFrench(currentCatSpeak);
+    }
+
+    /* =====================================================================
+       6. TAB 4: FLASHCARDS & SMART QUIZ
+       ===================================================================== */
+    const FLASHCARDS_DATA = [
+      // Oct 14-22
+      { cat: 'Oct 14–22', front: "Non, Marcos N'habite PAS à Madrid", sub: 'Negation: N\'...PAS', th: 'ไม่ มาร์กอสไม่ได้อาศัยอยู่ที่มาดริด', en: 'Marcos habite à Paris', tip: 'เอา N\' และ PAS ประกบหน้า-หลังกริยา', speak: "Non, Marcos n'habite pas à Madrid, Marcos habite à Paris" },
+      { cat: 'Oct 14–22', front: 'Quelles langues Paula parle ?', sub: 'Quelles อ่านว่า "kell"', th: 'เปาลาพูดภาษาอะไรบ้าง?', en: 'Which languages does Paula speak?', tip: 'Elle parle espagnol, anglais et allemand.', speak: 'Quelles langues Paula parle ?' },
+      { cat: 'Oct 14–22', front: "Paula N'est PAS française", sub: 'Negation', th: 'เปาลาไม่ใช่คนฝรั่งเศส (เธอเป็นคนสเปน)', en: 'Elle est espagnole', tip: 'ลดรูป ne เป็น N\' หน้า est', speak: "Non, Paula n'est pas française, elle est espagnole" },
+      { cat: 'Oct 14–22', front: "Quel âge tu as ? → J'ai vingt ans", sub: 'เชื่อมเสียง vingtTans', th: 'เธออายุเท่าไหร่? → ฉันอายุ 20 ปี', en: '"I have" 20 years', tip: 'ฝรั่งเศสใช้ AVOIR (มี) บอกอายุ ไม่ใช้ ÊTRE', speak: "Quel âge tu as ? J'ai vingt ans" },
+      { cat: 'Oct 14–22', front: "Tu habites où ? → J'habite à... en/au...", sub: '6 Identity Questions', th: 'เธออยู่ที่ไหน? → ฉันอยู่ที่เมือง... ประเทศ...', en: 'à + city / EN or AU + country', tip: 'à + ชื่อเมือง / EN (หญิง) หรือ AU (ชาย) + ประเทศ', speak: "Tu habites où ? J'habite à Paris en France" },
+      { cat: 'Oct 14–22', front: "AVOIR: J'ai / Tu as / Il a / Nous (Z) avons / Vous (Z) avez / Ils (Z) ont", sub: 'Liaison (Z) & (N)', th: 'มี (to have)', en: 'Verb AVOIR full conjugation', tip: 'จำ Nous (Z) avons, Vous (Z) avez, Ils (Z) ont', speak: "J'ai, tu as, il a, nous avons, vous avez, ils ont" },
+      { cat: 'Oct 14–22', front: "J'ai ONZE singes / J'ai vingt-deux camarades de classe", sub: 'AVOIR + ตัวเลข', th: 'ฉันมีลิง 11 ตัว / ฉันมีเพื่อนร่วมชั้น 22 คน', en: '11 monkeys / 22 classmates', tip: 'จำตัวอย่างทั้ง 8 ประโยคจากบท 21–22 ต.ค.', speak: "J'ai onze singes. J'ai vingt-deux camarades de classe." },
+      { cat: 'Oct 14–22', front: 'FAIRE: Je fais / Tu fais / Il fait / Nous faisons / Vous FAITES / Ils FONT', sub: 'ระวัง Vous FAITES!', th: 'ทำ (to do / to make)', en: 'Verb FAIRE full conjugation', tip: 'Vous FAITES ไม่ใช่ faisez! และ Ils FONT', speak: 'Je fais, tu fais, il fait, nous faisons, vous faites, ils font' },
+      { cat: 'Oct 14–22', front: 'Il fait le ménage / Nous faisons la lessive / Vous faites la cuisine', sub: 'FAIRE + งานบ้าน', th: 'ทำความสะอาด / ซักผ้า / ทำอาหาร', en: 'the cleaning (le nettoyage) / laundry / cooking', tip: 'Je fais mes devoirs = ทำการบ้าน', speak: 'Il fait le ménage. Nous faisons la lessive. Vous faites la cuisine.' },
+      { cat: 'Oct 14–22', front: 'Il fait DU badminton / Elle fait DE LA danse', sub: 'DU ชาย vs DE LA หญิง', th: 'เขาเล่นแบดมินตัน / เธอเต้นรำ', en: 'du tennis, du basket-ball / de la course, de la pétanque', tip: 'กีฬาเพศชายใช้ DU / กีฬาเพศหญิงใช้ DE LA', speak: 'Il fait du badminton. Elle fait de la danse.' },
+      { cat: 'Oct 14–22', front: 'Elle fait DE LA course  VS  Elle fait DES courses', sub: '⚠️ FYI Trap!', th: 'วิ่งออกกำลังกาย (เอกพจน์) VS ซื้อของ/ช้อปปิ้ง (พหูพจน์)', en: 'running VS she does some shopping', tip: 'เติม s + ใช้ DES = ช้อปปิ้งทันที!', speak: 'Elle fait de la course. Elle fait des courses.' },
+
+      // -ER Verbs
+      { cat: 'กริยา -ER', front: 'หางกริยา -ER ทั้ง 6 ประธาน', sub: 'สูตรทองคำ', th: '-e, -es, -e, -ons, -ez, -ent', en: 'Je -e / Tu -es / Il -e / Nous -ons / Vous -ez / Ils -ent', tip: 'ตัด -ER ออกแล้วเติมหางตามประธานได้เลย', speak: 'Je parle, tu parles, il parle, nous parlons, vous parlez, ils parlent' },
+      { cat: 'กริยา -ER', front: "AIMER: J'aime / Nous z aimons / Vous Z aimez", sub: 'ลดรูป J\' + เชื่อมเสียง z', th: 'ชอบ / รัก (to like / to love)', en: 'Starts with vowel → J\' & liaison z', tip: 'กริยาขึ้นต้นสระหรือ h ต้องเชื่อม z กับ Nous/Vous/Ils/elles', speak: "J'aime, nous aimons, vous aimez, ils aiment" },
+      { cat: 'กริยา -ER', front: "HABITER & ÉCOUTER", sub: '4 Verbes Importants', th: 'อาศัยอยู่ (to live) & ฟัง (to listen)', en: "J'habite / J'écoute", tip: 'ทั้ง 2 ตัวลดรูปเป็น J\' และเชื่อมเสียง z', speak: "J'habite à Paris. J'écoute la musique." },
+      { cat: 'กริยา -ER', front: "S'APPELER: Je m'appelle / nous nous z appelons", sub: 'เบิ้ล ll vs l ตัวเดียว', th: 'ชื่อว่า (to be called / named)', en: "Tu t'appelles / vous vous z appelez", tip: 'Nous, Vous ใช้ l ตัวเดียว นอกนั้น ll สองตัว!', speak: "Je m'appelle, tu t'appelles, il s'appelle, nous nous appelons, vous vous appelez, ils s'appellent" },
+      { cat: 'กริยา -ER', front: 'Travailler / Étudier / Manger / Regarder / Acheter / Donner', sub: '6 กริยา -ER เพิ่มเติม', th: 'ทำงาน / เรียน / กิน / ดู / ซื้อ / ให้', en: 'work / study / eat / watch / buy / give', tip: 'จำพิเศษ: Nous mangeons (คง e), J\'achète (ใส่ è)', speak: 'Travailler, étudier, manger, regarder, acheter, donner' },
+
+      // Directions & 4 Verbs
+      { cat: 'บอกทาง & 4 กริยา', front: 'Je CHERCHE le bureau 42', sub: 'Video PDF page 35', th: 'ฉันกำลังหาห้องทำงาน 42', en: 'I am looking for the office 42', tip: 'QUI est au bureau 42 ? = ใครอยู่ในห้อง 42?', speak: 'Je cherche le bureau quarante-deux' },
+      { cat: 'บอกทาง & 4 กริยา', front: "C'est TOUT DROIT / TOURNEZ À GAUCHE / À DROITE", sub: 'คำสั่งบอกทาง', th: 'ตรงไป / เลี้ยวซ้าย / เลี้ยวขวา', en: 'straight forward / turn left / turn right', tip: 'จำง่าย: GAUCHE = ซ้าย, DROITE = ขวา', speak: "C'est tout droit. Tournez à gauche. Tournez à droite." },
+      { cat: 'บอกทาง & 4 กริยา', front: "AU BOUT DU / DE LA ... & Il n'est pas loin", sub: 'บอกระยะทาง', th: 'สุดทางของ... & มันอยู่ไม่ไกล', en: 'at the end of... & it is NOT far', tip: 'DU (เพศชาย) // DE LA (เพศหญิง)', speak: "Au bout du couloir. Il n'est pas loin." },
+      { cat: 'บอกทาง & 4 กริยา', front: "Il est LÀ  << / >>  c'est ICI", sub: 'ตรงนั้น vs ตรงนี้', th: 'มันอยู่ตรงนั้น << / >> มันอยู่ตรงนี้', en: 'it is there << / >> it is here', tip: 'LÀ = ตรงนั้น (ไกลกว่า) / ICI = ตรงนี้ (ใกล้ตัว)', speak: "Il est là. C'est ici." },
+      { cat: 'บอกทาง & 4 กริยา', front: 'ALLER: Je vais / Tu vas / Il va / Nous Z allons / Vous Z allez / Ils vont', sub: 'Liaison Z', th: 'ไป (to go)', en: 'Irregular verb ALLER', tip: 'ออกเสียงเชื่อม Z ที่ Nous Z allons, Vous Z allez', speak: 'Je vais, tu vas, il va, nous allons, vous allez, ils vont' },
+      { cat: 'บอกทาง & 4 กริยา', front: 'CONNAÎTRE: Je connais / Nous connaissons / Ils connaissent', sub: 'to know', th: 'รู้จัก (Tu connais ....?)', en: 'connais, connais, connaît, connaissons, connaissez, connaissent', tip: 'พหูพจน์มี -ss- ทุกตัว!', speak: 'Je connais, tu connais, il connaît, nous connaissons, vous connaissez, ils connaissent' },
+
+      // Numbers & Ordinals
+      { cat: 'ตัวเลข & ลำดับที่', front: '30 Trente / 40 Quarante / 50 Cinquante / 60 Soixante', sub: 'กฎ ET un', th: '30 / 40 / 50 / 60 (ลงท้าย 1 ใช้ ET un)', en: 'trente ET un, quarante ET un, cinquante ET un, soixante ET un', tip: '31, 41, 51, 61 ต้องมี ET un เสมอ', speak: 'trente, quarante, cinquante, soixante, soixante-neuf' },
+      { cat: 'ตัวเลข & ลำดับที่', front: 'Le 1er: le premier (masc) // la première (fem)', sub: 'ลำดับที่ 1 แยกเพศ', th: 'ลำดับที่ 1 (ชาย/หญิง)', en: '1st (masculine vs feminine)', tip: 'ตั้งแต่ 2e เป็นต้นไป ชาย-หญิงใช้รูปเดียวกัน!', speak: 'le premier, la première' },
+      { cat: 'ตัวเลข & ลำดับที่', front: '2e DEUXième (DEUZième) / 3e troiZième / 9e neufVième', sub: 'จุดออกเสียงลำดับที่', th: 'ลำดับที่ 2 / ที่ 3 / ที่ 9', en: 'x/s → Z sound, f → V sound', tip: 'la 69ème Avenue = la soixSSante neuf Vième avenue', speak: 'la deuxième, la troisième, la neuvième, la soixante-neuvième avenue' },
+
+      // Prepositions
+      { cat: 'บุพบท (แมวอยู่ไหน)', front: 'le chat / le chien / le lit / la lampe / la chaise', sub: '5 คำศัพท์ในห้อง', th: 'แมว (ช) / หมา (ช) / เตียง (ช) / โคมไฟ (ญ) / เก้าอี้ (ญ)', en: 'cat / dog / bed / lamp / chair', tip: '3 ตัวแรกเพศชาย (le) • 2 ตัวหลังเพศหญิง (la)', speak: 'le chat, le chien, le lit, la lampe, la chaise' },
+      { cat: 'บุพบท (แมวอยู่ไหน)', front: 'OÙ EST LE CHAT ? >> LE CHAT EST DANS LE LIT', sub: 'อย่าลืม EST == is!', th: 'แมวอยู่ไหน? >> แมวอยู่ในเตียง', en: 'DANS = in /// SUR = on / SOUS = under', tip: 'ต้องมีคำว่า EST เสมอในประโยคบอกตำแหน่ง!', speak: 'Où est le chat ? Le chat est dans le lit.' },
+      { cat: 'บุพบท (แมวอยู่ไหน)', front: 'le chat est à côté DU chien // à droite DE LA lampe', sub: 'DU ชาย vs DE LA หญิง', th: 'แมวอยู่ข้างๆ หมา // อยู่ทางขวาของโคมไฟ', en: 'next to the dog // right of the lamp', tip: 'le chien → DU chien | la lampe → DE LA lampe', speak: 'Le chat est à côté du chien. Le chat est à droite de la lampe.' },
+      { cat: 'บุพบท (แมวอยู่ไหน)', front: 'Le chat est ENTRE le lit ET la lampe', sub: 'between ..1.. and ..2..', th: 'แมวอยู่ระหว่างเตียงกับโคมไฟ', en: 'ENTRE LE 1 ET LA 2', tip: 'DERRIÈRE = หลัง ### DEVANT = หน้า', speak: 'Le chat est entre le lit et la lampe. Le chat est derrière le lit.' },
+    ];
+
+    let fcCategory = 'ทั้งหมด';
+    let fcList = [...FLASHCARDS_DATA];
+    let fcIndex = 0;
+    let fcKnownSet = new Set();
+
+    function initFlashcards() {
+      const cats = ['ทั้งหมด', 'Oct 14–22', 'กริยา -ER', 'บอกทาง & 4 กริยา', 'ตัวเลข & ลำดับที่', 'บุพบท (แมวอยู่ไหน)'];
+      document.getElementById('fc-filters').innerHTML = cats.map(c => `
+        <button onclick="filterFlashcards('${c}')" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
+          fcCategory === c ? 'bg-navy text-white border-navy' : 'bg-white text-stone-600 border-stone-200 hover:border-navy'
+        }">${c}</button>
+      `).join('');
+      renderFlashcard();
+    }
+
+    function filterFlashcards(cat) {
+      fcCategory = cat;
+      fcList = cat === 'ทั้งหมด' ? [...FLASHCARDS_DATA] : FLASHCARDS_DATA.filter(f => f.cat === cat);
+      fcIndex = 0;
+      initFlashcards();
+    }
+
+    function renderFlashcard() {
+      if (!fcList.length) return;
+      const card = fcList[fcIndex];
+      document.getElementById('flashcard-inner').classList.remove('is-flipped');
+      document.getElementById('fc-cat-badge').textContent = card.cat;
+      document.getElementById('fc-counter').textContent = `${fcIndex + 1} / ${fcList.length}`;
+      document.getElementById('fc-front-text').textContent = card.front;
+      document.getElementById('fc-front-sub').textContent = card.sub;
+      document.getElementById('fc-back-th').textContent = card.th;
+      document.getElementById('fc-back-en').textContent = card.en;
+      document.getElementById('fc-back-tip').textContent = `💡 ${card.tip}`;
+      document.getElementById('fc-known-badge').textContent = `จำได้แล้ว: ${fcKnownSet.size} / ${FLASHCARDS_DATA.length}`;
+    }
+
+    function flipFlashcard() {
+      document.getElementById('flashcard-inner').classList.toggle('is-flipped');
+    }
+    function nextFlashcard() {
+      fcIndex = (fcIndex + 1) % fcList.length;
+      renderFlashcard();
+    }
+    function prevFlashcard() {
+      fcIndex = (fcIndex - 1 + fcList.length) % fcList.length;
+      renderFlashcard();
+    }
+    function markFlashcardKnown() {
+      fcKnownSet.add(fcList[fcIndex].front);
+      showToast('เยี่ยม! นับว่าจำการ์ดนี้ได้แล้ว ✓', 'success');
+      nextFlashcard();
+    }
+    function shuffleFlashcards() {
+      fcList.sort(() => Math.random() - 0.5);
+      fcIndex = 0;
+      renderFlashcard();
+      showToast('สลับลำดับการ์ดแล้ว 🔀');
+    }
+    function speakCurrentFlashcard() {
+      if (fcList[fcIndex]) speakFrench(fcList[fcIndex].speak);
+    }
+
+    // SMART QUIZ (18 Diverse Questions covering ALL 3 PDFs)
+    const QUIZ_BANK = [
+      {
+        q: 'ข้อใดใช้รูปปฏิเสธได้ถูกต้องตามบทเรียนเรื่อง Marcos?',
+        opts: ["Marcos habite pas à Madrid", "Marcos N'habite PAS à Madrid", "Marcos ne habite pas à Madrid", "Marcos N'est PAS habite Madrid"],
+        ans: 1,
+        exp: "ต้องเอา N' ... PAS ประกบหน้า-หลังกริยา และลดรูป ne → N' เพราะ habite ขึ้นต้นด้วยตัว h ไม่ออกเสียง",
+        speak: "Non, Marcos n'habite pas à Madrid"
+      },
+      {
+        q: 'ถ้าต้องการถามอายุว่า "เธออายุเท่าไหร่?" และตอบ "ฉันอายุ 20 ปี" ต้องใช้ข้อใด?',
+        opts: ["Quel âge tu es ? → Je suis vingt ans", "Quel âge tu as ? → J'ai vingt ans", "Quel âge tu fais ? → Je fais vingt ans", "Comment tu as ? → J'ai vingt"],
+        ans: 1,
+        exp: 'ภาษาฝรั่งเศสใช้กริยา AVOIR ("I have" 20 years) → Quel âge tu as ? / J\'ai vingt ans (เชื่อมเสียง vingtTans)',
+        speak: "Quel âge tu as ? J'ai vingt ans"
+      },
+      {
+        q: 'ข้อใดผันกริยา AVOIR กับประธาน Nous และ Ils ได้ถูกต้อง?',
+        opts: ["Nous avons / Ils ont", "Nous avois / Ils avont", "Nous avons / Ils avez", "Nous avez / Ils ont"],
+        ans: 0,
+        exp: "Nous (Z) AVONS และ Ils/elles (Z) ONT (ออกเสียงเชื่อมตัว Z ทั้งคู่)",
+        speak: "Nous avons. Ils ont."
+      },
+      {
+        q: 'ข้อใดคือการผันกริยา FAIRE กับประธาน Vous ที่ถูกต้อง?',
+        opts: ["Vous faisez", "Vous faisons", "Vous FAITES", "Vous font"],
+        ans: 2,
+        exp: "ระวังกับดัก! กริยา FAIRE เมื่อใช้กับ Vous จะผันเป็น Vous FAITES (ไม่ใช่ faisez)",
+        speak: "Vous faites la cuisine"
+      },
+      {
+        q: 'ประโยค "Elle fait DES courses" (พหูพจน์) แปลว่าอะไร?',
+        opts: ["เธอวิ่งออกกำลังกาย (running)", "เธอไปซื้อของ/ช้อปปิ้ง (shopping)", "เธอทำอาหาร (cooking)", "เธอซักผ้า (laundry)"],
+        ans: 1,
+        exp: "FYI สำคัญมาก! Elle fait DE LA course = วิ่งออกกำลังกาย แต่ Elle fait DES courses (พหูพจน์) = ช้อปปิ้ง/ซื้อของ",
+        speak: "Elle fait des courses"
+      },
+      {
+        q: 'คำว่า "badminton" เป็นเพศชาย ส่วน "danse" เป็นเพศหญิง ข้อใดใช้กับกริยา FAIRE ถูกต้อง?',
+        opts: ["Il fait DE LA badminton / Elle fait DU danse", "Il fait DU badminton / Elle fait DE LA danse", "Il fait DES badminton / Elle fait LE danse", "Il fait LE badminton / Elle fait LA danse"],
+        ans: 1,
+        exp: "เล่นกีฬากับ FAIRE: เพศชายใช้ DU (du badminton, du tennis) เพศหญิงใช้ DE LA (de la danse, de la course, de la pétanque)",
+        speak: "Il fait du badminton. Elle fait de la danse."
+      },
+      {
+        q: 'กริยาลงท้าย -ER อย่าง "PARLER" เมื่อผันกับ Ils/elles จะได้รูปใด?',
+        opts: ["Ils parlons", "Ils parlez", "Ils parlent", "Ils parles"],
+        ans: 2,
+        exp: "หางกริยา -ER ของ Ils/elles คือ -ent (Ils parlent) ซึ่ง -ent ไม่ต้องออกเสียง",
+        speak: "Ils parlent français"
+      },
+      {
+        q: 'ข้อใดผันกริยา "AIMER" กับประธาน Je และ Nous ได้ถูกต้อง?',
+        opts: ["Je aime / Nous aimons", "J'aime / Nous z aimons", "J'aimes / Nous aimons", "Je m'aime / Nous aimons"],
+        ans: 1,
+        exp: "AIMER ขึ้นต้นด้วยสระ จึงลดรูป Je → J'aime และเชื่อมเสียง z ใน Nous z aimons",
+        speak: "J'aime. Nous aimons."
+      },
+      {
+        q: 'ข้อใดผันกริยา "S\'APPELER" กับประธาน Nous และ Vous ได้ถูกต้อง (สังเกตตัว l)?',
+        opts: ["nous nous appellons / vous vous appellez", "nous nous appelons / vous vous appelez", "nous m'appelons / vous t'appelez", "nous s'appelons / vous s'appelez"],
+        ans: 1,
+        exp: "ทริคจำ S'appeler: Nous และ Vous ใช้ l ตัวเดียว (appelons / appelez) และเชื่อมเสียง z ส่วนประธานอื่นเบิ้ล ll",
+        speak: "Nous nous appelons. Vous vous appelez."
+      },
+      {
+        q: 'กริยาเสริม 6 ตัว: "Acheter" และ "Donner" แปลว่าอะไรตามลำดับ?',
+        opts: ["กิน / ทำงาน", "ดู / เรียน", "ซื้อ / ให้", "ฟัง / อาศัยอยู่"],
+        ans: 2,
+        exp: "Acheter = to buy (ซื้อ) และ Donner = to give (ให้)",
+        speak: "Acheter. Donner."
+      },
+      {
+        q: 'ประโยค "Je CHERCHE le bureau 42" และ "Il n\'est pas loin" แปลว่าอะไร?',
+        opts: ["ฉันรู้จักห้อง 42 / มันอยู่ไกลมาก", "ฉันกำลังหาห้อง 42 / มันอยู่ไม่ไกล", "ฉันอยู่ในห้อง 42 / มันอยู่ตรงนี้", "ใครอยู่ห้อง 42 / เลี้ยวซ้าย"],
+        ans: 1,
+        exp: "CHERCHER = มองหา/ค้นหา (look for) และ Il n'est pas loin = มันอยู่ไม่ไกล (NOT far)",
+        speak: "Je cherche le bureau quarante-deux. Il n'est pas loin."
+      },
+      {
+        q: 'ข้อใดผันกริยา "ALLER" (ไป) กับ Je, Nous, Ils ได้ถูกต้อง?',
+        opts: ["Je vais / Nous Z allons / Ils vont", "Je alle / Nous allons / Ils allent", "Je vas / Nous Z allez / Ils vont", "Je vais / Nous allons / Ils allez"],
+        ans: 0,
+        exp: "ALLER เป็นกริยาไม่ปกติ: Je vais, Tu vas, Il va, Nous Z allons, Vous Z allez, Ils/elles vont",
+        speak: "Je vais, nous allons, ils vont"
+      },
+      {
+        q: 'ข้อใดผันกริยา "CONNAÎTRE" (รู้จัก) กับ Nous และ Ils ได้ถูกต้อง?',
+        opts: ["Nous connaitons / Ils connaitent", "Nous connaissons / Ils connaissent", "Nous connais / Ils connaient", "Nous connaissez / Ils connaissons"],
+        ans: 1,
+        exp: "CONNAÎTRE พหูพจน์ใช้ -ss-: Nous connaissons, Vous connaissez, Ils/elles connaissent",
+        speak: "Nous connaissons. Ils connaissent."
+      },
+      {
+        q: 'ตัวเลข 41 และ 69 ในภาษาฝรั่งเศสเขียนอย่างไร?',
+        opts: ["quarante-un / soixante-neuf", "quarante ET un / soixante-neuf", "cinquante ET un / soixante-dix", "trente ET un / quarante-neuf"],
+        ans: 1,
+        exp: "เลขลงท้ายด้วย 1 (31, 41, 51, 61) ต้องมีคำว่า ET un → quarante et un และ 69 = soixante-neuf",
+        speak: "quarante et un. soixante-neuf."
+      },
+      {
+        q: 'เลขลำดับที่ 1 (1er) และลำดับที่ 9 (9e) ข้อใดถูกต้อง?',
+        opts: ["le premier (ชาย) / la première (หญิง) และ la neuvième (neufVième)", "le unième และ la neufième", "la premier และ le neuxième", "le première และ la neuvième"],
+        ans: 0,
+        exp: "ลำดับที่ 1 แยกเพศ le premier / la première และลำดับที่ 9 เปลี่ยน f เป็น v → la neuvième (โน้ตอาจารย์: neufVième)",
+        speak: "le premier, la première, la neuvième"
+      },
+      {
+        q: 'ในประโยคบอกตำแหน่ง "Où est le chat ?" คำไหนที่อาจารย์ย้ำว่าห้ามลืมเด็ดขาด?',
+        opts: ["Le chat dans le lit (ไม่ต้องมีกริยา)", "LE CHAT EST DANS LE LIT (ห้ามลืม EST == is)", "Le chat a dans le lit", "Le chat fait dans le lit"],
+        ans: 1,
+        exp: "don't forget EST == is! ต้องพูดว่า LE CHAT EST DANS LE LIT เสมอ",
+        speak: "Le chat est dans le lit"
+      },
+      {
+        q: 'คำว่า "le chien" เป็นเพศชาย และ "la lampe" เป็นเพศหญิง ข้อใดถูกต้อง?',
+        opts: ["à côté DE LA chien / à droite DU lampe", "à côté DU chien / à droite DE LA lampe", "à côté LE chien / à droite LA lampe", "à côté DES chien / à droite DE lampe"],
+        ans: 1,
+        exp: "เพศชายใช้ DU (à côté DU chien) • เพศหญิงใช้ DE LA (à droite DE LA lampe)",
+        speak: "Le chat est à côté du chien. Le chat est à droite de la lampe."
+      },
+      {
+        q: 'คำว่า "ENTRE le lit ET la lampe" และ "DERRIÈRE ### DEVANT" แปลว่าอะไร?',
+        opts: ["ระหว่างเตียงกับโคมไฟ / ข้างหลัง ### ข้างหน้า", "บนเตียงกับโคมไฟ / ซ้าย ### ขวา", "ใต้เตียงกับโคมไฟ / ใน ### บน", "ข้างๆ เตียงกับโคมไฟ / ใกล้ ### ไกล"],
+        ans: 0,
+        exp: "ENTRE ... ET ... = ระหว่าง...กับ... (between) และ DERRIÈRE (behind) ### DEVANT (in front of)",
+        speak: "Le chat est entre le lit et la lampe. Le chat est derrière le lit."
+      },
+    ];
+
+    let quizState = { questions: [], idx: 0, score: 0, answered: false, selected: -1 };
+
+    function switchPracticeMode(mode) {
+      const isFlash = mode === 'flashcards';
+      document.getElementById('practice-flashcards').classList.toggle('hidden', !isFlash);
+      document.getElementById('practice-quiz').classList.toggle('hidden', isFlash);
+      document.getElementById('btn-mode-flash').className = `px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${isFlash ? 'bg-navy text-white' : 'text-stone-600 hover:text-navy'}`;
+      document.getElementById('btn-mode-quiz').className = `px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition ${!isFlash ? 'bg-navy text-white' : 'text-stone-600 hover:text-navy'}`;
+      if (!isFlash && quizState.questions.length === 0) startQuiz(12);
+    }
+
+    function startQuiz(count = 12) {
+      const shuffled = [...QUIZ_BANK].sort(() => Math.random() - 0.5).slice(0, Math.min(count, QUIZ_BANK.length));
+      quizState = { questions: shuffled, idx: 0, score: 0, answered: false, selected: -1 };
+      renderQuizQuestion();
+    }
+
+    function renderQuizQuestion() {
+      const card = document.getElementById('quiz-card');
+      const total = quizState.questions.length;
+
+      if (quizState.idx >= total) {
+        const pct = Math.round((quizState.score / total) * 100);
+        const msg = pct >= 85 ? 'Très bien ! เก่งมาก จำได้แม่นสุดๆ 🎉' : pct >= 60 ? 'Bien ! ทำได้ดีมาก ทบทวนอีกนิดเป๊ะแน่นอน 💪' : 'Courage ! ลองทบทวน Flashcards แล้วมาลุยใหม่นะ 🥐';
+        card.innerHTML = `
+          <div class="text-center py-4 space-y-4">
+            <div class="text-5xl">${pct >= 80 ? '🏆' : pct >= 60 ? '🌟' : '📚'}</div>
+            <h3 class="text-2xl font-bold text-navy">สรุปคะแนนแบบทดสอบ</h3>
+            <div class="text-4xl font-fr font-extrabold text-coral">${quizState.score} / ${total} <span class="text-xl text-stone-400">(${pct}%)</span></div>
+            <p class="text-sm text-stone-600">${msg}</p>
+            <div class="flex flex-wrap justify-center gap-3 pt-2">
+              <button onclick="startQuiz(12)" class="px-5 py-2.5 rounded-xl bg-navy text-white text-sm font-bold hover:bg-navyDark">🔄 ทำแบบทดสอบใหม่ (12 ข้อสุ่ม)</button>
+              <button onclick="startQuiz(18)" class="px-5 py-2.5 rounded-xl bg-coral text-white text-sm font-bold hover:bg-red-600">🔥 ลุยครบทุกข้อ (18 ข้อ)</button>
+            </div>
+          </div>`;
+        return;
+      }
+
+      const item = quizState.questions[quizState.idx];
+      card.innerHTML = `
+        <div class="flex items-center justify-between text-xs font-bold">
+          <span class="px-3 py-1 rounded-full bg-navy/10 text-navy">ข้อที่ ${quizState.idx + 1} / ${total}</span>
+          <span class="text-emerald-700">คะแนน: ${quizState.score}</span>
+        </div>
+        <div class="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+          <div class="h-full bg-coral transition-all duration-300" style="width:${((quizState.idx) / total) * 100}%"></div>
+        </div>
+        <h3 class="text-base sm:text-lg font-bold text-navy leading-relaxed">${item.q}</h3>
+        <div class="space-y-2.5">
+          ${item.opts.map((opt, i) => {
+            let cls = 'bg-paper border-stone-200 hover:border-navy text-navy';
+            if (quizState.answered) {
+              if (i === item.ans) cls = 'bg-emerald-50 border-emerald-500 text-emerald-900 ring-2 ring-emerald-200';
+              else if (i === quizState.selected) cls = 'bg-red-50 border-coral text-coral';
+              else cls = 'bg-stone-50 border-stone-200 text-stone-400';
+            }
+            return `
+              <button onclick="answerQuiz(${i})" ${quizState.answered ? 'disabled' : ''}
+                class="w-full text-left p-3.5 rounded-xl border-2 font-fr font-semibold text-sm transition ${cls}">
+                <span class="inline-block w-6 font-bold opacity-60">${String.fromCharCode(65 + i)}.</span> ${opt}
+              </button>`;
+          }).join('')}
+        </div>
+        ${quizState.answered ? `
+          <div class="rounded-2xl p-4 ${quizState.selected === item.ans ? 'bg-emerald-50 border border-emerald-200' : 'bg-amber-50 border border-amber-200'} space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-sm ${quizState.selected === item.ans ? 'text-emerald-800' : 'text-coral'}">
+                ${quizState.selected === item.ans ? '✓ ถูกต้อง! Très bien !' : '✕ ยังไม่ถูกนะ มาดูเฉลยกัน:'}
+              </span>
+              <button onclick="speakFrench('${item.speak.replace(/'/g, "\\'")}')" class="px-2.5 py-1 rounded-lg bg-white border border-stone-200 text-xs font-bold text-navy">🔊 ฟังคำตอบ</button>
+            </div>
+            <p class="text-xs sm:text-sm text-stone-700 leading-relaxed">${item.exp}</p>
+          </div>
+          <div class="flex justify-end">
+            <button onclick="nextQuizQuestion()" class="px-5 py-2.5 rounded-xl bg-navy hover:bg-navyDark text-white text-sm font-bold">
+              ${quizState.idx + 1 === total ? 'ดูผลคะแนน →' : 'ข้อถัดไป →'}
+            </button>
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function answerQuiz(i) {
+      if (quizState.answered) return;
+      quizState.answered = true;
+      quizState.selected = i;
+      if (i === quizState.questions[quizState.idx].ans) quizState.score++;
+      renderQuizQuestion();
+    }
+
+    function nextQuizQuestion() {
+      quizState.idx++;
+      quizState.answered = false;
+      quizState.selected = -1;
+      renderQuizQuestion();
+    }
+
+    /* =====================================================================
+       7. TAB 5: ALL-IN-ONE MASTER CHEAT SHEET
+       ===================================================================== */
+    const CHEAT_BLOCKS = [
+      {
+        title: '📘 เอกสารที่ 1: LESSONS 14.15 OCT (+ 21–22 OCT)',
+        items: [
+          ['Forum & Negation', "LE FORUM DES JEUNES ÉTRANGERS À PARIS • Non, Marcos N'habite PAS à Madrid, Marcos habite à Paris. • Quelles (sounds \"kell\" = which) langues Paula parle ? Elle parle espagnol, anglais et allemand. • Paula est française ? >>> Non, Paula N'est PAS française, elle est espagnole. • Ref: exercices 1 et 3 page 13 (TDC / CA U1L2)"],
+          ['ตัวเลข 11 → 30', "11 onze, 12 douze, 13 treize, 14 quatorze, 15 quinze, 16 seize, 17 dix-sept, 18 dix-huit, 19 dix-neuf, 20 vingt (J'ai vingtTans), 21 vingtTet un, 22 vingtTdeux ... 30 trente"],
+          ['6 คำถามสัมภาษณ์ + การบ้าน', "1) Comment tu t'appelles ? >> Je m'appelle...+ nationalité (Je suis...) | 2) Quel âge tu as ? >> J'ai vingt ans (\"I have\" 20 years) | 3) Tu habites où ? >> J'habite à... (city) EN/AU (country) | 4) Qu'est-ce que tu fais ? >> Je suis...(job) | 5) Qu'est-ce que tu aimes ? >> J'aime le/la/les (3 ex) | 6) Quelles langues tu parles ? >>> Je parle (3 ex) • Class: Interview Kyllian Mbappé (in class, not in Madrid :-) • Homework: ask these 6 questions to a star/famous person you admire"],
+          ['AVOIR (to have) + 8 ประโยค', "J'AI | Tu AS | Il/elle/on (N) A | Nous (Z) AVONS | Vous (Z) AVEZ | Ils/elles (Z) ONT • 1) J'ai vingt deux camarades de classe 2) Nous avons dix-sept sacs 3) J'ai quinze paires de chaussures 4) J'ai ONZE singes 5) J'ai cinq doigts 6) J'ai neuf chats 7) Tu as vingt-sept chemises dans la chambre 8) J'ai sept robes à la maison"],
+          ['FAIRE (to do/make) & FYI', "Je FAIS | Tu FAIS | Il/elle/on FAIT | Nous FAISONS | Vous FAITES | Ils/elles FONT • Je fais mes devoirs (homework), Il fait le ménage / le nettoyage (cleaning), nous faisons la lessive (laundry), vous faites la cuisine (cooking), Elle fait des études d'Histoire (d'Allemand / de Chinois) • Sport: DU (masc) badminton/tennis/basket-ball | DE LA (fem) danse/course (running)/pétanque • ⚠️ FYI: Elle fait DES courses (pluriel) = she does some shopping • Ref: + Masculin/feminine: exercice 1 et 2 page 13, The articles, Done"]
+        ]
+      },
+      {
+        title: '⚡ เอกสารที่ 2: 4 VERBES IMPORTANTS FINISHING BY -ER',
+        items: [
+          ['สูตรหาง -ER & ประธาน', "I: Je/J' (-e) | You (my friend): Tu (-es) | He/she/someone: Il/elle/on (-e) | We: Nous (-ons) | You (guys/polite): Vous (-ez) | They (masc/fem): Ils/elles (-ent)"],
+          ['PARLER (to speak)', "Je parl--e | Tu parl--es | Il/elle/on parl--e | Nous parl--ons | Vous parl--ez | Ils/elles parl--ent"],
+          ['AIMER (to like/love)', "J'aim---e | Tu aim---es | Il/elle/on aim---e | Nous z aim---ons | Vous Z aim---ez | Ils/elles z aim---ent"],
+          ['HABITER (to live)', "J'habit---e | Tu habit---es | Il/elle/on habit---e | Nous z habit---ons | Vous z habit---ez | Ils/elles z habit---ent"],
+          ['ÉCOUTER (to listen)', "J'écout---e | Tu écout---es | Il/elle/on écout---e | Nous z écout---ons | Vous z écout---ez | Ils/elles z écout---ent"],
+          ["S'appeler (to be called/named)", "Je m'appelle | Tu t'appelles | il (elle) s'appelle | nous nous z appelons | vous vous z appelez | ils (elles) s'appellent"],
+          ['กริยา -ER เพิ่มเติม 6 คำ', "Travailler (to work) • Étudier (to study) • Manger (to eat) • Regarder (to watch/look at) • Acheter (to buy) • Donner (to give)"]
+        ]
+      },
+      {
+        title: '🧭 เอกสารที่ 3: LESSONS 28.29 OCT + 4.5 NOV',
+        items: [
+          ['VIDEO: Où est le bureau 42? (PDF p.35)', "Je CHERCHE le bureau 42 (looking for) • Tu CONNAIS ....? (do you know?) • QUI est au bureau 42 ? (WHO is in...) • C'est TOUT DROIT (straight forward) • TOURNEZ À GAUCHE (turn left) • TOURNEZ À DROITE (turn right) • AU BOUT DU (masc) // de la (fem) (at the end of) • Il n'est pas loin (NOT far) • Il est LÀ (there) << / >> c'est ICI (here)"],
+          ['4 กริยาบอกทาง', "ALLER (go): vais, vas, va, Nous Z allons, Vous Z allez, vont • CONNAÎTRE (know): connais, connais, connaît, connaissons, connaissez, connaissent • TOURNER (turn): tourne, tournes, tourne, tournons, tournez, tournent • CHERCHER (look for): cherche, cherches, cherche, cherchons, cherchez, cherchent"],
+          ['ตัวเลข 30 >> 69', "30 Trente / trente ET un / trente deux • 40 Quarante / quarante ET un • 50 Cinquante / cinquante ET un • 60 Soixante / soixante ET un >> soixante-neuf"],
+          ['ลำดับที่ 1st >>>> 69th', "1er: le premier (masc) // la première (fem) • 2e+: masc & fem SIMILAR >>> 2e DEUXième (DEUZième), 3e troisième (troiZième), 4e quatrième, 5e cinquième, 6e six(Z)ième, 9e neufVième, 10e dix(Z)ième, 20e vingTième, 21e vingT-et unième, 22e vingTdeux(Z)ième, 30e trentième, 39e trenteneuf(V)ième, 69e Avenue = la soixSSante neuf Vième avenue"],
+          ['บุพบท & Où est le chat ?', "คำศัพท์: le chat (cat), le chien (dog), le lit (bed), la lampe (lamp), la chaise (chair) • คู่บุพบท: À GAUCHE DU/DE LA ### À DROITE DU/DE LA | SUR LE/LA ### SOUS LE/LA (on # under) | DERRIÈRE LE ### DEVANT LE (behind # in front of) | DANS LE (in) /// SUR LE (on) | À CÔTÉ DU/DE LA (near/next to) | AU BOUT DU/DE LA (at the end of) | ENTRE LE 1 ET LA 2 (between — to be explained and practiced next week) • ประโยค: OÙ EST LE CHAT ? >> LE CHAT EST DANS LE LIT (don't forget EST==is) // derrière le lit // à côté DU chien // à droite DE LA lampe // ENTRE le lit ET la lampe"]
+        ]
+      }
+    ];
+
+    function renderCheatSheet(query = '') {
+      const q = query.trim().toLowerCase();
+      const container = document.getElementById('cheat-sheet-content');
+      container.innerHTML = CHEAT_BLOCKS.map(block => {
+        const filtered = block.items.filter(([k, v]) => !q || k.toLowerCase().includes(q) || v.toLowerCase().includes(q));
+        if (!filtered.length) return '';
+        return `
+          <div class="bg-white rounded-2xl p-5 shadow-card border border-stone-200/80 print-break-avoid space-y-3">
+            <h3 class="font-bold text-navy text-base border-b border-stone-100 pb-2">${block.title}</h3>
+            <div class="space-y-2.5">
+              ${filtered.map(([k, v]) => `
+                <div class="p-3 rounded-xl bg-paper border border-stone-200/70">
+                  <div class="font-bold text-coral text-xs sm:text-sm mb-1">${k}</div>
+                  <div class="text-xs sm:text-sm text-stone-700 leading-relaxed font-fr">${v}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>`;
+      }).join('') || `<div class="text-center py-10 text-stone-400 text-sm">ไม่พบคำว่า "${query}" ในชีทสรุป</div>`;
+    }
+
+    function filterCheatSheet(val) {
+      renderCheatSheet(val);
+    }
+
+    /* =====================================================================
+       8. GLOBAL SEARCH ACROSS ALL 3 LESSONS
+       ===================================================================== */
+    const SEARCH_INDEX = [];
+    function buildSearchIndex() {
+      // Tab 1 items
+      SEARCH_INDEX.push(
+        { fr: "Non, Marcos N'habite PAS à Madrid", th: 'ปฏิเสธ N\'...PAS (Marcos / Paula)', tab: 1, sec: 'sec-1-1', speak: "Non, Marcos n'habite pas à Madrid, Marcos habite à Paris" },
+        { fr: 'Quelles (sounds "kell") langues Paula parle ?', th: 'เปาลาพูดภาษาอะไรบ้าง (espagnol, anglais, allemand)', tab: 1, sec: 'sec-1-1', speak: 'Quelles langues Paula parle ?' },
+        { fr: "J'ai vingtTans / vingtTet un / vingtTdeux", th: 'ตัวเลข 11–30 และจุดเชื่อมเสียง', tab: 1, sec: 'sec-1-2', speak: "J'ai vingt ans. vingt et un. vingt-deux." },
+        { fr: 'Interview Kylian Mbappé & 6 questions', th: '6 คำถามสัมภาษณ์ข้อมูลส่วนตัว & การบ้านดารา', tab: 1, sec: 'sec-1-3', speak: "Comment tu t'appelles ? Quel âge tu as ? Tu habites où ?" },
+        { fr: "AVOIR: J'ai, Tu as, Il a, Nous avons, Vous avez, Ils ont", th: 'กริยา AVOIR (มี) + 8 ประโยคตัวอย่าง', tab: 1, sec: 'sec-1-4', speak: "J'ai, tu as, il a, nous avons, vous avez, ils ont" },
+        { fr: 'FAIRE: Je fais, Nous faisons, Vous faites, Ils font', th: 'กริยา FAIRE (ทำ) งานบ้าน เรียน กีฬา DU/DE LA', tab: 1, sec: 'sec-1-5', speak: 'Je fais, tu fais, il fait, nous faisons, vous faites, ils font' },
+        { fr: 'Elle fait DE LA course VS Elle fait DES courses', th: 'วิ่งออกกำลังกาย vs ช้อปปิ้ง/ซื้อของ (FYI Trap)', tab: 1, sec: 'sec-1-5', speak: 'Elle fait de la course. Elle fait des courses.' }
+      );
+      AVOIR_SENTENCES.forEach(s => SEARCH_INDEX.push({ fr: s.fr, th: s.th, tab: 1, sec: 'sec-1-4', speak: s.fr }));
+      // Tab 2 items
+      FOUR_ER_VERBS.forEach(v => SEARCH_INDEX.push({ fr: `${v.inf} (${v.en})`, th: `กริยา -ER สำคัญ: ${v.th}`, tab: 2, sec: 'sec-2-2', speak: v.inf.toLowerCase() }));
+      SEARCH_INDEX.push({ fr: "S'appeler (Je m'appelle / nous nous z appelons)", th: 'ชื่อว่า (เบิ้ล ll vs l ตัวเดียว)', tab: 2, sec: 'sec-2-3', speak: "Je m'appelle. Nous nous appelons." });
+      EXTRA_ER_VERBS.forEach(v => SEARCH_INDEX.push({ fr: `${v.inf} (${v.en})`, th: `กริยา -ER เสริม: ${v.th}`, tab: 2, sec: 'sec-2-4', speak: v.inf }));
+      // Tab 3 items
+      DIRECTION_PHRASES.forEach(p => SEARCH_INDEX.push({ fr: p.fr, th: `${p.en} — ${p.th}`, tab: 3, sec: 'sec-3-1', speak: p.speak }));
+      DIRECTION_4VERBS.forEach(v => SEARCH_INDEX.push({ fr: `${v.inf} (${v.en})`, th: `4 กริยาบอกทาง: ${v.th}`, tab: 3, sec: 'sec-3-2', speak: v.inf.toLowerCase() }));
+      for (let n = 11; n <= 69; n++) {
+        SEARCH_INDEX.push({ fr: `${n} = ${NUMBERS_FR[n]}`, th: `ตัวเลขภาษาฝรั่งเศสเลข ${n}`, tab: n <= 30 ? 1 : 3, sec: n <= 30 ? 'sec-1-2' : 'sec-3-3', speak: NUMBERS_FR[n] });
+      }
+      PDF_ORDINAL_NOTES.forEach(o => SEARCH_INDEX.push({ fr: `${o.tag}: ${o.fr}`, th: `เลขลำดับที่ — ${o.note}`, tab: 3, sec: 'sec-3-4', speak: o.speak }));
+      CAT_POSITIONS.forEach(c => SEARCH_INDEX.push({ fr: c.fr, th: `บุพบทบอกตำแหน่ง: ${c.th}`, tab: 3, sec: 'sec-3-5', speak: c.speak }));
+    }
+
+    function openSearchModal() {
+      const m = document.getElementById('search-modal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+      const inp = document.getElementById('modal-search-input');
+      inp.focus();
+      renderSearchResults(inp.value);
+    }
+
+    function openSearchResults() {
+      const val = document.getElementById('desktop-search-input').value;
+      document.getElementById('modal-search-input').value = val;
+      openSearchModal();
+    }
+
+    function closeSearchModal() {
+      const m = document.getElementById('search-modal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function handleGlobalSearch(val) {
+      document.getElementById('clear-search-btn').classList.toggle('hidden', !val.trim());
+      if (val.trim().length >= 1) {
+        document.getElementById('modal-search-input').value = val;
+        openSearchModal();
+        renderSearchResults(val);
+      }
+    }
+
+    function clearGlobalSearch() {
+      document.getElementById('desktop-search-input').value = '';
+      document.getElementById('modal-search-input').value = '';
+      document.getElementById('clear-search-btn').classList.add('hidden');
+      closeSearchModal();
+    }
+
+    function renderSearchResults(query) {
+      const q = (query || '').trim().toLowerCase();
+      const box = document.getElementById('search-results-list');
+      const matches = q
+        ? SEARCH_INDEX.filter(item => item.fr.toLowerCase().includes(q) || item.th.toLowerCase().includes(q)).slice(0, 24)
+        : SEARCH_INDEX.slice(0, 10);
+
+      if (!matches.length) {
+        box.innerHTML = `<div class="text-center py-8 text-stone-400 text-sm">ไม่พบคำค้นหา "${query}" ลองพิมพ์คำสั้นลง เช่น avoir, chat, 69, bureau</div>`;
+        return;
+      }
+
+      box.innerHTML = matches.map(m => `
+        <div class="p-3 rounded-xl bg-paper border border-stone-200 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div class="font-fr font-bold text-navy text-sm truncate">${m.fr}</div>
+            <div class="text-xs text-stone-600 truncate">${m.th}</div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="speakFrench('${m.speak.replace(/'/g, "\\'")}')" class="p-2 rounded-lg bg-white border border-stone-200 hover:bg-navy hover:text-white text-xs">🔊</button>
+            <button onclick="jumpToSection(${m.tab}, '${m.sec}')" class="px-2.5 py-2 rounded-lg bg-navy text-white text-xs font-semibold hover:bg-navyDark">ไปที่บทเรียน</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSearchModal();
+    });
+
+    /* =====================================================================
+       9. BOOTSTRAP APP
+       ===================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      buildSearchIndex();
+      renderNavs();
+      renderTab1();
+      renderTab2();
+      renderTab3();
+      initFlashcards();
+      renderCheatSheet();
+      renderProgressUI();
+    });
+  </script>
+</body>
+</html>
